@@ -14,5 +14,7 @@ namespace SALONESNETWORK.MODELS.Entities
 
         public int? Id_Perfil { get; set; } // FK a Perfil
         public Perfil Perfil { get; set; }
+        public bool Estado { get; set; }
+
     }
 }

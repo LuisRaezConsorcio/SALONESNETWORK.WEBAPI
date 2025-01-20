@@ -26,67 +26,260 @@ namespace SALONESNETWORK.WEBAPI.Controllers
         }
 
         // GET: api/UsuarioPerfil
-        [HttpGet("GetUsuarioPerfiles")]
-        public async Task<ActionResult<IEnumerable<UsuarioPerfil>>> GetUsuarioPerfiles()
+        [HttpGet("GetAll")]
+        public async Task<IActionResult> GetAll()
         {
-            //return await _context.UsuarioPerfiles.ToListAsync();
-            IQueryable<UsuarioPerfil> queryContactoSQL = await _usuarioPerfilService.ObtenerTodos();
+            try
+            {
+                IQueryable<UsuarioPerfil> queryContactoSQL = await _usuarioPerfilService.ObtenerTodos();
 
-            List<UsuarioPerfilDTO> lista = queryContactoSQL
-                                                     .Select(c => new UsuarioPerfilDTO()
-                                                     {
-                                                         Id = c.Id,
-                                                         Id_Usuario = c.Id_Usuario,
-                                                         Id_Perfil = c.Id_Perfil
-                                                     }).ToList();
+                List<UsuarioPerfilDTO> lista = queryContactoSQL.Select(c => new UsuarioPerfilDTO()
+                {
+                    Id = c.Id,
+                    Id_Usuario = c.Id_Usuario,
+                    Id_Perfil = c.Id_Perfil
+                }).ToList();
 
-            return StatusCode(StatusCodes.Status200OK, lista);
+                return StatusCode(StatusCodes.Status200OK, new { valor = lista, mensaje = "Lista obtenida correctamente." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = "Error al obtener la lista.", detalle = ex.Message });
+            }
         }
 
-        // GET: api/UsuarioPerfil/5
-        [HttpGet("GetUsuarioPerfilById")]
-        public async Task<ActionResult<UsuarioPerfil>> GetUsuarioPerfilById(int id)
+        // GET: api/GetUsuarioPerfilById/5
+        [HttpGet("GetUsuarioPerfilIdByUsuarioPerfil")]
+        public async Task<ActionResult> GetUsuarioPerfilIdByUsuarioPerfil(UsuarioPerfilDTO modelo)
         {
-            // Llama al servicio para obtener el registro por ID
-            var UsuarioPerfil = await _usuarioPerfilService.ObtenerPorId(id);
-
-            // Verifica si el resultado es nulo
-            if (UsuarioPerfil == null)
+            try
             {
-                return NotFound(new { mensaje = "El país no fue encontrado." });
+                UsuarioPerfil NuevoModelo = new UsuarioPerfil
+                {
+                    Id_Usuario = modelo.Id_Usuario,
+                    Id_Perfil = modelo.Id_Perfil
+                };
+
+                int? UsuarioPerfilId = await _usuarioPerfilService.ObtenerId(NuevoModelo);
+
+                if (UsuarioPerfilId == null)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, new { valor = UsuarioPerfilId, mensaje = "No hay un Usuario con el Perfil consultado." });
+                }
+
+                return StatusCode(StatusCodes.Status200OK, new { valor = UsuarioPerfilId, mensaje = "Id encontrado." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = "Error al obtener el ID.", detalle = ex.Message });
+            }
+        }
+        
+        // GET: api/UsuarioPerfil/5
+        [HttpGet("GetUsuarioPerfilByUsuario")]
+        public async Task<ActionResult<IEnumerable<UsuarioPerfil>>> GetUsuarioPerfilByUsuario(int idusuario)
+        {
+
+            try
+            {
+                UsuarioPerfil NuevoModelo = new UsuarioPerfil
+                {
+                    Id_Usuario = idusuario
+                };
+
+                IQueryable<UsuarioPerfil> queryContactoSQL = await _usuarioPerfilService.ObtenerPorUsuario(NuevoModelo);
+
+                List<UsuarioPerfilDTO> lista = queryContactoSQL.Select(c => new UsuarioPerfilDTO()
+                {
+                    Id = c.Id,
+                    Id_Usuario = c.Id_Usuario,
+                    Id_Perfil = c.Id_Perfil
+                }).ToList();
+
+                return StatusCode(StatusCodes.Status200OK, new { valor = lista, mensaje = "Perfiles obtenidos correctamente." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = "Error al obtener los perfiles.", detalle = ex.Message });
+            }
+        }
+
+        // GET: api/GetUsuarioPerfilByPerfil/5
+        [HttpGet("GetUsuarioPerfilByPerfil")]
+        public async Task<ActionResult<IEnumerable<UsuarioPerfil>>> GetUsuarioPerfilByPerfil(int idperfil)
+        {
+
+            try
+            {
+                UsuarioPerfil NuevoModelo = new UsuarioPerfil
+                {
+                    Id_Perfil = idperfil
+                };
+
+                IQueryable<UsuarioPerfil> queryContactoSQL = await _usuarioPerfilService.ObtenerPorPerfil(NuevoModelo);
+
+                List<UsuarioPerfilDTO> lista = queryContactoSQL.Select(c => new UsuarioPerfilDTO()
+                {
+                    Id = c.Id,
+                    Id_Usuario = c.Id_Usuario,
+                    Id_Perfil = c.Id_Perfil
+                }).ToList();
+
+                return StatusCode(StatusCodes.Status200OK, new { valor = lista, mensaje = "Perfiles obtenidos correctamente." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = "Error al obtener los perfiles.", detalle = ex.Message });
+            }
+        }
+
+        //PUT: api/UsuarioPerfil/5
+        //  To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //[HttpPut("PutUsuarioPerfil")]
+        //public async Task<IActionResult> PutUsuarioPerfil(UsuarioPerfilDTO modelo)
+        //{
+
+        //    UsuarioPerfil NuevoModelo = new UsuarioPerfil()
+        //    {
+        //        Id_Usuario = modelo.Id_Usuario,
+        //        Id_Perfil = modelo.Id_Perfil
+        //    };
+
+        //    //Buscar el modelo existente en la base de datos
+        //    var UsuarioPerfilExistente = await _usuarioPerfilService.ObtenerPorId(NuevoModelo);
+
+        //    if (UsuarioPerfilExistente == null)
+        //        return NotFound(new { mensaje = "El país no existe." });
+
+        //    //Actualizar solo las propiedades del modelo que tienen datos en el DTO
+        //    UsuarioPerfilExistente.Id_Usuario = modelo.Id_Usuario ?? UsuarioPerfilExistente.Id_Usuario;
+        //    UsuarioPerfilExistente.Id_Perfil = modelo.Id_Perfil ?? UsuarioPerfilExistente.Id_Perfil;
+
+        //    //Realizar la actualización
+        //    bool respuesta = await _usuarioPerfilService.Actualizar(UsuarioPerfilExistente);
+
+        //    return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+        //}
+
+        // DELETE: api/UsuarioPerfil/5
+        [HttpDelete("DeleteUsuarioPerfil")]
+        public async Task<IActionResult> DeleteUsuarioPerfil(UsuarioPerfilDTO modelo)
+        {
+            if (modelo == null || modelo.Id_Usuario <= 0 || modelo.Id_Perfil <= 0)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new
+                {
+                    mensaje = "Los datos proporcionados no son válidos. Asegúrese de enviar un usuario y perfil válidos."
+                });
             }
 
-            // Convierte la entidad a DTO
-            var UsuarioPerfilDTO = new UsuarioPerfilDTO
+            UsuarioPerfil nuevoModelo = new UsuarioPerfil
             {
-                Id = UsuarioPerfil.Id,
-                Id_Usuario = UsuarioPerfil.Id_Usuario,
-                Id_Perfil = UsuarioPerfil.Id_Perfil
+                Id_Usuario = modelo.Id_Usuario,
+                Id_Perfil = modelo.Id_Perfil
             };
 
-            // Retorna el DTO con un status 200
-            return Ok(UsuarioPerfilDTO);
+            try
+            {
+                int? usuarioPerfilId = await _usuarioPerfilService.ObtenerId(nuevoModelo);
+
+                if (usuarioPerfilId == null)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, new
+                    {
+                        mensaje = "No se encontró un usuario-perfil con los datos proporcionados."
+                    });
+                }
+
+                bool eliminado = await _usuarioPerfilService.Eliminar(usuarioPerfilId.Value);
+
+                if (!eliminado)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new
+                    {
+                        mensaje = "Ocurrió un problema al intentar eliminar el usuario-perfil."
+                    });
+                }
+
+                return StatusCode(StatusCodes.Status200OK, new
+                {
+                    mensaje = "El usuario-perfil se eliminó correctamente.",
+                    id = usuarioPerfilId
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    mensaje = "Ocurrió un error inesperado al procesar la solicitud.",
+                    detalle = ex.Message
+                });
+            }
         }
 
-        // PUT: api/UsuarioPerfil/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("PutUsuarioPerfil")]
-        public async Task<IActionResult> PutUsuarioPerfil(UsuarioPerfilDTO modelo)
+        // DELETE: api/DeleteUsuarioPerfilByUsuario/5
+        [HttpDelete("DeleteUsuarioPerfilByUsuario")]
+        public async Task<IActionResult> DeleteUsuarioPerfilByUsuario(int idUsuario)
         {
-            // Buscar el modelo existente en la base de datos
-            var UsuarioPerfilExistente = await _usuarioPerfilService.ObtenerPorId(modelo.Id);
+            if (idUsuario <= 0)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, new
+                {
+                    valor = idUsuario,
+                    mensaje = "El ID de usuario debe ser un número positivo."
+                });
+            }
 
-            if (UsuarioPerfilExistente == null)
-                return NotFound(new { mensaje = "El país no existe." });
+            try
+            {
+                bool eliminado = await _usuarioPerfilService.EliminarPorUsuario(idUsuario);
 
-            // Actualizar solo las propiedades del modelo que tienen datos en el DTO
-            UsuarioPerfilExistente.Id_Usuario = modelo.Id_Usuario ?? UsuarioPerfilExistente.Id_Usuario;
-            UsuarioPerfilExistente.Id_Perfil = modelo.Id_Perfil ?? UsuarioPerfilExistente.Id_Perfil;
+                if (!eliminado)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, new
+                    {
+                        valor = idUsuario,
+                        mensaje = $"No se encontraron perfiles asociados al usuario con ID {idUsuario}."
+                    });
+                }
 
-            // Realizar la actualización
-            bool respuesta = await _usuarioPerfilService.Actualizar(UsuarioPerfilExistente);
+                return StatusCode(StatusCodes.Status200OK, new
+                {
+                    valor = idUsuario,
+                    mensaje = "Todos los perfiles del usuario han sido eliminados correctamente."
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    valor = idUsuario,
+                    mensaje = "Ocurrió un error inesperado al procesar la solicitud.",
+                    detalle = ex.Message
+                });
+            }
+        }
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+        // DELETE: api/DeleteUsuarioPerfilByPerfil/5
+        [HttpDelete("DeleteUsuarioPerfilByPerfil")]
+        public async Task<IActionResult> DeleteUsuarioPerfilByPerfil(int idPerfil)
+        {
+
+            try
+            {
+                bool eliminado = await _usuarioPerfilService.EliminarPorPerfil(idPerfil);
+
+                if (!eliminado)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, new { valor = idPerfil, mensaje = $"No se encontraron perfiles asociados al perfil con ID {idPerfil}." });
+                }
+
+                return StatusCode(StatusCodes.Status200OK, new { valor = idPerfil, mensaje = "Todos los perfiles del perfil han sido eliminados correctamente." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { valor = idPerfil, mensaje = "Error al eliminar los perfiles.", detalle = ex.Message });
+            }
         }
 
         // POST: api/UsuarioPerfil
@@ -95,37 +288,28 @@ namespace SALONESNETWORK.WEBAPI.Controllers
         public async Task<IActionResult> PostUsuarioPerfil(UsuarioPerfilDTO modelo)
         {
 
-            UsuarioPerfil NuevoModelo = new UsuarioPerfil()
+            try
             {
-                Id_Usuario = modelo.Id_Usuario,
-                Id_Perfil = modelo.Id_Perfil
-            };
+                UsuarioPerfil NuevoModelo = new UsuarioPerfil
+                {
+                    Id_Usuario = modelo.Id_Usuario,
+                    Id_Perfil = modelo.Id_Perfil
+                };
 
-            bool respuesta = await _usuarioPerfilService.Insertar(NuevoModelo);
+                bool respuesta = await _usuarioPerfilService.Insertar(NuevoModelo);
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+                if (!respuesta)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new { mensaje = "No se pudo insertar el perfil de usuario." });
+                }
 
-        }
-
-        // DELETE: api/UsuarioPerfil/5
-        [HttpDelete("DeleteUsuarioPerfil")]
-        public async Task<IActionResult> DeleteUsuarioPerfil(int id)
-        {
-            var UsuarioPerfil = await _usuarioPerfilService.ObtenerPorId(id);
-            if (UsuarioPerfil == null)
-            {
-                return NotFound();
+                return StatusCode(StatusCodes.Status201Created, new { valor = modelo, mensaje = "Perfil de usuario creado correctamente." });
             }
-
-            await _usuarioPerfilService.Eliminar(id);
-            //await _usuarioPerfilService.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = "Error al crear el perfil de usuario.", detalle = ex.Message });
+            }
         }
 
-        //private bool UsuarioPerfilExists(int id)
-        //{
-        //    return _context.UsuarioPerfiles.Any(e => e.Id == id);
-        //}
     }
 }

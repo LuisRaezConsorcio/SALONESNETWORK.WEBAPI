@@ -15,5 +15,10 @@ namespace SALONESNETWORK.MODELS.Entities
         public DateTime? FechaModificacion { get; set; }
         public int? UsuarioModificacion { get; set; }
         public Boolean? Estado { get; set; }
+
+        public ICollection<AsuntoPaisSeccionSub> AsuntoPaisSeccionSubs { get; set; }
+        public ICollection<UbicacionMensaje> UbicacionMensajes { get; set; }
+
+
     }
 }
