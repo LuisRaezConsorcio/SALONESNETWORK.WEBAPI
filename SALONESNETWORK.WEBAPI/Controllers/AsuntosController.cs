@@ -26,8 +26,8 @@ namespace SALONESNETWORK.WEBAPI.Controllers
         }
 
         // GET: api/Asunto
-        [HttpGet("GetAsuntoes")]
-        public async Task<ActionResult<IEnumerable<Asunto>>> GetAsuntoes()
+        [HttpGet("GetAsuntos")]
+        public async Task<ActionResult<IEnumerable<Asunto>>> GetAsuntos()
         {
             //return await _context.Asuntoes.ToListAsync();
             IQueryable<Asunto> queryContactoSQL = await _asuntoService.ObtenerTodos();
@@ -37,6 +37,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                                                      {
                                                          Id = c.Id,
                                                          Nombre = c.Nombre,
+                                                         Descripcion = c.Descripcion,
                                                          FechaCreacion = c.FechaCreacion,
                                                          UsuarioCreacion = c.UsuarioCreacion,
                                                          FechaModificacion = c.FechaModificacion,
@@ -65,6 +66,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
             {
                 Id = Asunto.Id,
                 Nombre = Asunto.Nombre,
+                Descripcion = Asunto.Descripcion,
                 FechaCreacion = Asunto.FechaCreacion,
                 UsuarioCreacion = Asunto.UsuarioCreacion,
                 FechaModificacion = Asunto.FechaModificacion,
@@ -89,8 +91,9 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
             // Actualizar solo las propiedades del modelo que tienen datos en el DTO
             AsuntoExistente.Nombre = modelo.Nombre ?? AsuntoExistente.Nombre;
+            AsuntoExistente.Descripcion = modelo.Descripcion ?? AsuntoExistente.Descripcion;
             AsuntoExistente.FechaModificacion = DateTime.Now;
-            AsuntoExistente.UsuarioModificacion = modelo.UsuarioModificacion ?? AsuntoExistente.UsuarioModificacion;
+            AsuntoExistente.UsuarioModificacion = 1;
             AsuntoExistente.Estado = modelo.Estado ?? AsuntoExistente.Estado;
 
             // Realizar la actualización
@@ -108,6 +111,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
             Asunto NuevoModelo = new Asunto()
             {
                 Nombre = modelo.Nombre,
+                Descripcion = modelo.Descripcion,
                 FechaCreacion = DateTime.Now,
                 UsuarioCreacion = 1,
                 Estado = true
@@ -134,10 +138,5 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
             return NoContent();
         }
-
-        //private bool AsuntoExists(int id)
-        //{
-        //    return _context.Asuntoes.Any(e => e.Id == id);
-        //}
     }
 }

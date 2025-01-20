@@ -39,10 +39,6 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                                                          Id = c.Id,
                                                          Id_TipoMensaje = c.Id_TipoMensaje,
                                                          Id_Usuario = c.Id_Usuario,
-                                                         Id_Asunto = c.Id_Asunto,
-                                                         Id_Pais = c.Id_Pais,
-                                                         Id_Seccion = c.Id_Seccion,
-                                                         Id_SubSeccion = c.Id_SubSeccion,
                                                          Nombre = c.Nombre,
                                                          Descripcion = c.Descripcion,
                                                          FechaCreacion = c.FechaCreacion,
@@ -77,10 +73,6 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                 Id = Mensaje.Id,
                 Id_TipoMensaje = Mensaje.Id_TipoMensaje,
                 Id_Usuario = Mensaje.Id_Usuario,
-                Id_Asunto = Mensaje.Id_Asunto,
-                Id_Pais = Mensaje.Id_Pais,
-                Id_Seccion = Mensaje.Id_Seccion,
-                Id_SubSeccion = Mensaje.Id_SubSeccion,
                 Nombre = Mensaje.Nombre,
                 Descripcion = Mensaje.Descripcion,
                 FechaCreacion = Mensaje.FechaCreacion,
@@ -111,10 +103,6 @@ namespace SALONESNETWORK.WEBAPI.Controllers
             // Actualizar solo las propiedades del modelo que tienen datos en el DTO
             MensajeExistente.Id_TipoMensaje = modelo.Id_TipoMensaje ?? MensajeExistente.Id_TipoMensaje;
             MensajeExistente.Id_Usuario = modelo.Id_Usuario ?? MensajeExistente.Id_Usuario;
-            MensajeExistente.Id_Asunto = modelo.Id_Asunto ?? MensajeExistente.Id_Asunto;
-            MensajeExistente.Id_Pais = modelo.Id_Pais ?? MensajeExistente.Id_Pais;
-            MensajeExistente.Id_Seccion = modelo.Id_Seccion ?? MensajeExistente.Id_Seccion;
-            MensajeExistente.Id_SubSeccion = modelo.Id_SubSeccion ?? MensajeExistente.Id_SubSeccion;
             MensajeExistente.Nombre = modelo.Nombre ?? MensajeExistente.Nombre;
             MensajeExistente.Descripcion = modelo.Descripcion ?? MensajeExistente.Descripcion;
             MensajeExistente.FechaModificacion = DateTime.Now;
@@ -141,10 +129,6 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                 
                 Id_TipoMensaje = modelo.Id_TipoMensaje,
                 Id_Usuario = modelo.Id_Usuario,
-                Id_Asunto = modelo.Id_Asunto,
-                Id_Pais = modelo.Id_Pais,
-                Id_Seccion = modelo.Id_Seccion,
-                Id_SubSeccion = modelo.Id_SubSeccion,
                 Nombre = modelo.Nombre,
                 Descripcion = modelo.Descripcion,
                 FechaCreacion = DateTime.Now,

@@ -11,10 +11,6 @@ namespace SALONESNETWORK.BLL.DTOs
         public int Id { get; set; }
         public int? Id_TipoMensaje { get; set; }
         public int? Id_Usuario { get; set; }
-        public int? Id_Asunto { get; set; }
-        public int? Id_Pais { get; set; }
-        public int? Id_Seccion { get; set; }
-        public int? Id_SubSeccion { get; set; }
         public string? Nombre { get; set; }
         public string? Descripcion { get; set; }
         public DateTime? FechaCreacion { get; set; }

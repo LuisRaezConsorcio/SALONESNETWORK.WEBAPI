@@ -4,7 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.Elfie.Serialization;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Common;
 using SALONESNETWORK.BLL.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
@@ -36,7 +38,18 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                                                      .Select(c => new UsuarioDTO()
                                                      {
                                                          Id = c.Id,
-                                                         Name = c.Name
+                                                          FirstName= c.FirstName,
+                                                          LastName= c.LastName,
+                                                          UserName= c.UserName,
+                                                          EmployedId= c.EmployedId,
+                                                          LocalTypeId= c.LocalTypeId,
+                                                          LocalId= c.LocalId,
+                                                          AreaId= c.AreaId,
+                                                          UserLocalId= c.UserLocalId,
+                                                          UserLocalId2 = c.UserLocalId2,
+                                                          UserLocalId3 = c.UserLocalId3,
+                                                          UserLocalComercialId= c.UserLocalComercialId,
+                                                          Token = c.Token
                                                      }).ToList();
 
             return StatusCode(StatusCodes.Status200OK, lista);
@@ -59,7 +72,18 @@ namespace SALONESNETWORK.WEBAPI.Controllers
             var UsuarioDTO = new UsuarioDTO
             {
                 Id = Usuario.Id,
-                Name = Usuario.Name
+                FirstName = Usuario.FirstName,
+                LastName = Usuario.LastName,
+                UserName = Usuario.UserName,
+                EmployedId = Usuario.EmployedId,
+                LocalTypeId = Usuario.LocalTypeId,
+                LocalId = Usuario.LocalId,
+                AreaId = Usuario.AreaId,
+                UserLocalId = Usuario.UserLocalId,
+                UserLocalId2 = Usuario.UserLocalId2,
+                UserLocalId3 = Usuario.UserLocalId3,
+                UserLocalComercialId = Usuario.UserLocalComercialId,
+                Token = Usuario.Token
             };
 
             // Retorna el DTO con un status 200
@@ -78,7 +102,18 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                 return NotFound(new { mensaje = "El país no existe." });
 
             // Actualizar solo las propiedades del modelo que tienen datos en el DTO
-            UsuarioExistente.Name = modelo.Name ?? UsuarioExistente.Name;
+            UsuarioExistente.FirstName = modelo.FirstName ?? UsuarioExistente.FirstName;
+            UsuarioExistente.LastName = modelo.LastName ?? UsuarioExistente.LastName;
+            UsuarioExistente.UserName = modelo.UserName ?? UsuarioExistente.UserName;
+            UsuarioExistente.EmployedId = modelo.EmployedId ?? UsuarioExistente.EmployedId;
+            UsuarioExistente.LocalTypeId = modelo.LocalTypeId ?? UsuarioExistente.LocalTypeId;
+            UsuarioExistente.LocalId = modelo.LocalId ?? UsuarioExistente.LocalId;
+            UsuarioExistente.AreaId = modelo.AreaId ?? UsuarioExistente.AreaId;
+            UsuarioExistente.UserLocalId = modelo.UserLocalId ?? UsuarioExistente.UserLocalId;
+            UsuarioExistente.UserLocalId2 = modelo.UserLocalId2 ?? UsuarioExistente.UserLocalId2;
+            UsuarioExistente.UserLocalId3 = modelo.UserLocalId3 ?? UsuarioExistente.UserLocalId3;
+            UsuarioExistente.UserLocalComercialId = modelo.UserLocalComercialId ?? UsuarioExistente.UserLocalComercialId;
+            UsuarioExistente.Token = modelo.Token ?? UsuarioExistente.Token;
 
             // Realizar la actualización
             bool respuesta = await _usuarioService.Actualizar(UsuarioExistente);
@@ -94,7 +129,18 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
             Usuario NuevoModelo = new Usuario()
             {
-                Name = modelo.Name
+                FirstName = modelo.FirstName,
+                LastName = modelo.LastName,
+                UserName = modelo.UserName,
+                EmployedId = modelo.EmployedId,
+                LocalTypeId = modelo.LocalTypeId,
+                LocalId = modelo.LocalId,
+                AreaId = modelo.AreaId,
+                UserLocalId = modelo.UserLocalId,
+                UserLocalId2 = modelo.UserLocalId2,
+                UserLocalId3 = modelo.UserLocalId3,
+                UserLocalComercialId = modelo.UserLocalComercialId,
+                Token = modelo.Token
             };
 
             bool respuesta = await _usuarioService.Insertar(NuevoModelo);

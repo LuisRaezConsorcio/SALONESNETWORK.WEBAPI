@@ -14,13 +14,13 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SubSubSeccionesController : ControllerBase
+    public class SubSeccionesController : ControllerBase
     {
         //private readonly SalonesDbContext _context;
 
         private readonly ISubSeccionService _subSeccioneService;
 
-        public SubSubSeccionesController(ISubSeccionService subSeccioneService)
+        public SubSeccionesController(ISubSeccionService subSeccioneService)
         {
             _subSeccioneService = subSeccioneService;
         }

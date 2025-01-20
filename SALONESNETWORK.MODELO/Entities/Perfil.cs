@@ -19,5 +19,6 @@ namespace SALONESNETWORK.MODELS.Entities
 
         // Propiedad de navegación para la relación muchos a muchos
         public ICollection<UsuarioPerfil> UsuarioPerfiles { get; set; }
+        public ICollection<PerfilSeccion> PerfilSecciones { get; set; }
     }
 }
