@@ -14,7 +14,7 @@ namespace SALONESNETWORK.MODELS.Entities
 
         public int? Id_Seccion { get; set; } // FK a Seccion
         public Seccion Seccion { get; set; }
-        public bool Estado { get; set; }
+        public Boolean? Estado { get; set; }
 
     }
 }

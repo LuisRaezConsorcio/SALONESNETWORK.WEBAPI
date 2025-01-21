@@ -21,7 +21,7 @@ namespace SALONESNETWORK.MODELS.Entities
         public int? Id_MensajeSeguimiento { get; set; }
         public Boolean? Respuesta { get; set; }
         public int? Id_MensajeRespuesta { get; set; }
-        public Boolean Estado { get; set; }
+        public Boolean? Estado { get; set; }
 
         // Propiedad de navegación para la relación muchos a muchos
         public ICollection<DocumentoMensaje> DocumentoMensajes { get; set; }

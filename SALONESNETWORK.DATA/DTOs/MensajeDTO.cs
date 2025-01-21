@@ -21,5 +21,6 @@ namespace SALONESNETWORK.BLL.DTOs
         public int? Id_MensajeSeguimiento { get; set; }
         public Boolean? Respuesta { get; set; }
         public int? Id_MensajeRespuesta { get; set; }
+        public Boolean? Estado { get; set; }
     }
 }

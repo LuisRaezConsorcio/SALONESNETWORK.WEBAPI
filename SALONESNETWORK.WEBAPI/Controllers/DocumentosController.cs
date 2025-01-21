@@ -27,105 +27,140 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
         // GET: api/Documentos
         [HttpGet("GetDocumentos")]
-        public async Task<ActionResult<IEnumerable<Documento>>> GetDocumentos()
+        public async Task<IActionResult> GetDocumentos()
         {
-            //return await _context.Documentoses.ToListAsync();
-            IQueryable<Documento> queryContactoSQL = await _documentosService.ObtenerTodos();
+            try
+            {
+                IQueryable<Documento> query = await _documentosService.ObtenerTodos();
 
-            List<DocumentoDTO> lista = queryContactoSQL
-                                                     .Select(c => new DocumentoDTO()
-                                                     {
-                                                         Id = c.Id,
-                                                         Descripcion = c.Descripcion,
-                                                         Ubicacion = c.Ubicacion
-                                                     }).ToList();
+                List<DocumentoDTO> lista = query
+                    .Select(c => new DocumentoDTO
+                    {
+                        Id = c.Id,
+                        Descripcion = c.Descripcion,
+                        Ubicacion = c.Ubicacion
+                    }).ToList();
 
-            return StatusCode(StatusCodes.Status200OK, lista);
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Lista de documentos obtenida correctamente.", Datos = lista, Resultado = true });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener los documentos.", Error = ex.Message });
+            }
         }
 
         // GET: api/Documentos/5
         [HttpGet("GetDocumentosById")]
-        public async Task<ActionResult<Documento>> GetDocumentosById(int id)
+        public async Task<IActionResult> GetDocumentosById(int id)
         {
-            // Llama al servicio para obtener el registro por ID
-            var Documentos = await _documentosService.ObtenerPorId(id);
-
-            // Verifica si el resultado es nulo
-            if (Documentos == null)
+            try
             {
-                return NotFound(new { mensaje = "El país no fue encontrado." });
+                var documento = await _documentosService.ObtenerPorId(id);
+
+                if (documento == null)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El documento no fue encontrado.", Resultado = false });
+                }
+
+                var documentoDTO = new DocumentoDTO
+                {
+                    Id = documento.Id,
+                    Descripcion = documento.Descripcion,
+                    Ubicacion = documento.Ubicacion
+                };
+
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Documento obtenido correctamente.", Datos = documentoDTO, Resultado = true });
             }
-
-            // Convierte la entidad a DTO
-            var DocumentosDTO = new DocumentoDTO
+            catch (Exception ex)
             {
-                Id = Documentos.Id,
-                Descripcion = Documentos.Descripcion,
-                Ubicacion = Documentos.Ubicacion
-            };
-
-            // Retorna el DTO con un status 200
-            return Ok(DocumentosDTO);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener el documento por ID.", Error = ex.Message });
+            }
         }
 
         // PUT: api/Documentos/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("PutDocumentos")]
         public async Task<IActionResult> PutDocumentos(DocumentoDTO modelo)
         {
-            // Buscar el modelo existente en la base de datos
-            var DocumentosExistente = await _documentosService.ObtenerPorId(modelo.Id);
+            try
+            {
+                var documentoExistente = await _documentosService.ObtenerPorId(modelo.Id);
 
-            if (DocumentosExistente == null)
-                return NotFound(new { mensaje = "El país no existe." });
+                if (documentoExistente == null)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El documento no existe.", Resultado = false });
+                }
 
-            // Actualizar solo las propiedades del modelo que tienen datos en el DTO
-            DocumentosExistente.Descripcion = modelo.Descripcion;
-            DocumentosExistente.Ubicacion = modelo.Ubicacion;
+                documentoExistente.Descripcion = modelo.Descripcion;
+                documentoExistente.Ubicacion = modelo.Ubicacion;
 
-            // Realizar la actualización
-            bool respuesta = await _documentosService.Actualizar(DocumentosExistente);
+                bool respuesta = await _documentosService.Actualizar(documentoExistente);
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+                if (!respuesta)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo actualizar el documento.", Resultado = false });
+                }
+
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Documento actualizado correctamente.", Resultado = respuesta });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al actualizar el documento.", Error = ex.Message });
+            }
         }
 
         // POST: api/Documentos
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("PostDocumentos")]
         public async Task<IActionResult> PostDocumentos(DocumentoDTO modelo)
         {
-
-            Documento NuevoModelo = new Documento()
+            try
             {
-                Descripcion = modelo.Descripcion,
-                Ubicacion = modelo.Ubicacion
-            };
+                Documento nuevoDocumento = new Documento
+                {
+                    Descripcion = modelo.Descripcion,
+                    Ubicacion = modelo.Ubicacion
+                };
 
-            bool respuesta = await _documentosService.Insertar(NuevoModelo);
+                bool respuesta = await _documentosService.Insertar(nuevoDocumento);
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+                if (!respuesta)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo insertar el documento", Resultado = false });
+                }
 
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Documento creado correctamente.", Resultado = respuesta });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al crear el documento.", Error = ex.Message });
+            }
         }
 
         // DELETE: api/Documentos/5
         [HttpDelete("DeleteDocumentos")]
         public async Task<IActionResult> DeleteDocumentos(int id)
         {
-            var Documentos = await _documentosService.ObtenerPorId(id);
-            if (Documentos == null)
+            try
             {
-                return NotFound();
+                var documento = await _documentosService.ObtenerPorId(id);
+
+                if (documento == null)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El documento no fue encontrado.", Resultado = false });
+                }
+
+                bool respuesta = await _documentosService.Eliminar(id);
+
+                if (!respuesta)
+                {
+                   return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo eliminar el documento.", Resultado = false });
+                }
+
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Documento eliminado correctamente.", Resultado = respuesta });
             }
-
-            await _documentosService.Eliminar(id);
-            //await _documentosService.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al eliminar el documento.", Error = ex.Message });
+            }
         }
-
-        //private bool DocumentosExists(int id)
-        //{
-        //    return _context.Documentoses.Any(e => e.Id == id);
-        //}
     }
 }

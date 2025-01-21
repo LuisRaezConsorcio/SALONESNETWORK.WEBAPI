@@ -12,5 +12,6 @@ namespace SALONESNETWORK.BLL.DTOs
         public int Id { get; set; }
         public int? Id_Usuario { get; set; } // FK a Usuario
         public int? Id_Perfil { get; set; } // FK a Perfil
+        public Boolean Estado { get; set; }
     }
 }

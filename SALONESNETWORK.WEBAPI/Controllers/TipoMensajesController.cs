@@ -27,121 +27,156 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
         // GET: api/TipoMensaje
         [HttpGet("GetTipoMensajes")]
-        public async Task<ActionResult<IEnumerable<TipoMensaje>>> GetTipoMensajes()
+        public async Task<IActionResult> GetTipoMensajes()
         {
-            //return await _context.TipoMensajees.ToListAsync();
-            IQueryable<TipoMensaje> queryContactoSQL = await _tipoMensajeService.ObtenerTodos();
+            try
+            {
+                IQueryable<TipoMensaje> queryTipoMensajeSQL = await _tipoMensajeService.ObtenerTodos();
 
-            List<TipoMensajeDTO> lista = queryContactoSQL
-                                                     .Select(c => new TipoMensajeDTO()
-                                                     {
-                                                         Id = c.Id,
-                                                         Nombre = c.Nombre,
-                                                         Descripcion = c.Descripcion,
-                                                         FechaCreacion = c.FechaCreacion,
-                                                         UsuarioCreacion = c.UsuarioCreacion,
-                                                         FechaModificacion = c.FechaModificacion,
-                                                         UsuarioModificacion = c.UsuarioModificacion,
-                                                         Estado = c.Estado,
-                                                     }).ToList();
+                List<TipoMensajeDTO> lista = queryTipoMensajeSQL
+                    .Select(c => new TipoMensajeDTO()
+                    {
+                        Id = c.Id,
+                        Nombre = c.Nombre,
+                        Descripcion = c.Descripcion,
+                        FechaCreacion = c.FechaCreacion,
+                        UsuarioCreacion = c.UsuarioCreacion,
+                        FechaModificacion = c.FechaModificacion,
+                        UsuarioModificacion = c.UsuarioModificacion,
+                        Estado = c.Estado,
+                    }).ToList();
 
-            return StatusCode(StatusCodes.Status200OK, lista);
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Los tipomensajes fueron obtenidos correctamente.", Datos = lista, Resultado = true });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener los tipos de mensaje", Error = ex.Message });
+            }
         }
 
         // GET: api/TipoMensaje/5
         [HttpGet("GetTipoMensajeById")]
-        public async Task<ActionResult<TipoMensaje>> GetTipoMensajeById(int id)
+        public async Task<IActionResult> GetTipoMensajeById(int id)
         {
-            // Llama al servicio para obtener el registro por ID
-            var TipoMensaje = await _tipoMensajeService.ObtenerPorId(id);
-
-            // Verifica si el resultado es nulo
-            if (TipoMensaje == null)
+            try
             {
-                return NotFound(new { mensaje = "El país no fue encontrado." });
+                var tipoMensaje = await _tipoMensajeService.ObtenerPorId(id);
+
+                if (tipoMensaje == null)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El tipo de mensaje no fue encontrado.", Resultado = false });
+                }
+
+                var tipoMensajeDTO = new TipoMensajeDTO
+                {
+                    Id = tipoMensaje.Id,
+                    Nombre = tipoMensaje.Nombre,
+                    Descripcion = tipoMensaje.Descripcion,
+                    FechaCreacion = tipoMensaje.FechaCreacion,
+                    UsuarioCreacion = tipoMensaje.UsuarioCreacion,
+                    FechaModificacion = tipoMensaje.FechaModificacion,
+                    UsuarioModificacion = tipoMensaje.UsuarioModificacion,
+                    Estado = tipoMensaje.Estado
+                };
+
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "El tipoMensaje fue encontrado correctamente", Datos = tipoMensajeDTO, Resultado = true });
             }
-
-            // Convierte la entidad a DTO
-            var TipoMensajeDTO = new TipoMensajeDTO
+            catch (Exception ex)
             {
-                Id = TipoMensaje.Id,
-                Nombre = TipoMensaje.Nombre,
-                Descripcion = TipoMensaje.Descripcion,
-                FechaCreacion = TipoMensaje.FechaCreacion,
-                UsuarioCreacion = TipoMensaje.UsuarioCreacion,
-                FechaModificacion = TipoMensaje.FechaModificacion,
-                UsuarioModificacion = TipoMensaje.UsuarioModificacion,
-                Estado = TipoMensaje.Estado
-            };
-
-            // Retorna el DTO con un status 200
-            return Ok(TipoMensajeDTO);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener el tipo de mensaje", Error = ex.Message });
+            }
         }
 
         // PUT: api/TipoMensaje/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("PutTipoMensaje")]
         public async Task<IActionResult> PutTipoMensaje(TipoMensajeDTO modelo)
         {
-            // Buscar el modelo existente en la base de datos
-            var TipoMensajeExistente = await _tipoMensajeService.ObtenerPorId(modelo.Id);
+            try
+            {
+                var tipoMensajeExistente = await _tipoMensajeService.ObtenerPorId(modelo.Id);
 
-            if (TipoMensajeExistente == null)
-                return NotFound(new { mensaje = "El país no existe." });
+                if (tipoMensajeExistente == null)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El tipo de mensaje no existe.", Resultado = false });
+                }
 
-            // Actualizar solo las propiedades del modelo que tienen datos en el DTO
-            TipoMensajeExistente.Nombre = modelo.Nombre ?? TipoMensajeExistente.Nombre;
-            TipoMensajeExistente.Descripcion = modelo.Descripcion ?? TipoMensajeExistente.Descripcion;
-            TipoMensajeExistente.FechaModificacion = DateTime.Now;
-            TipoMensajeExistente.UsuarioModificacion = modelo.UsuarioModificacion ?? TipoMensajeExistente.UsuarioModificacion;
-            TipoMensajeExistente.Estado = modelo.Estado ?? TipoMensajeExistente.Estado;
+                tipoMensajeExistente.Nombre = modelo.Nombre ?? tipoMensajeExistente.Nombre;
+                tipoMensajeExistente.Descripcion = modelo.Descripcion ?? tipoMensajeExistente.Descripcion;
+                tipoMensajeExistente.FechaModificacion = DateTime.Now;
+                tipoMensajeExistente.UsuarioModificacion = modelo.UsuarioModificacion ?? tipoMensajeExistente.UsuarioModificacion;
+                tipoMensajeExistente.Estado = modelo.Estado ?? tipoMensajeExistente.Estado;
 
-            // Realizar la actualización
-            bool respuesta = await _tipoMensajeService.Actualizar(TipoMensajeExistente);
+                bool respuesta = await _tipoMensajeService.Actualizar(tipoMensajeExistente);
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+                if (!respuesta)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo actualizar el registro.", Resultado = false });
+                }
+
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Actualización exitosa.", Resultado = respuesta });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new {Mensaje = $"Ocurrió un error al actualizar el tipo de mensaje", Error = ex.Message });
+            }
         }
 
         // POST: api/TipoMensaje
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("PostTipoMensaje")]
         public async Task<IActionResult> PostTipoMensaje(TipoMensajeDTO modelo)
         {
-
-            TipoMensaje NuevoModelo = new TipoMensaje()
+            try
             {
-                Nombre = modelo.Nombre,
-                Descripcion = modelo.Descripcion,
-                FechaCreacion = DateTime.Now,
-                UsuarioCreacion = 1,
-                Estado = true
-            };
+                var nuevoModelo = new TipoMensaje()
+                {
+                    Nombre = modelo.Nombre,
+                    Descripcion = modelo.Descripcion,
+                    FechaCreacion = DateTime.Now,
+                    UsuarioCreacion = modelo.UsuarioCreacion ?? 1,
+                    Estado = true
+                };
 
-            bool respuesta = await _tipoMensajeService.Insertar(NuevoModelo);
+                bool respuesta = await _tipoMensajeService.Insertar(nuevoModelo);
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+                if (!respuesta)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo insertar el registro.", Resultado = false });
+                }
 
+                return StatusCode(StatusCodes.Status201Created, new { Mensaje = "Registro exitoso.", Resultado = respuesta });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al registrar el tipo de mensaje", Error = ex.Message });
+            }
         }
 
         // DELETE: api/TipoMensaje/5
         [HttpDelete("DeleteTipoMensaje")]
         public async Task<IActionResult> DeleteTipoMensaje(int id)
         {
-            var TipoMensaje = await _tipoMensajeService.ObtenerPorId(id);
-            if (TipoMensaje == null)
+            try
             {
-                return NotFound();
+                var tipoMensaje = await _tipoMensajeService.ObtenerPorId(id);
+
+                if (tipoMensaje == null)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El tipo de mensaje no existe.", Resultado = false });
+                }
+
+                bool respuesta = await _tipoMensajeService.Eliminar(id);
+
+                if (!respuesta)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo eliminar el registro.", Resultado = false });
+                }
+
+                return StatusCode(StatusCodes.Status204NoContent, new { Mensaje = "Eliminación exitosa.", Resultado = respuesta });
             }
-
-            await _tipoMensajeService.Eliminar(id);
-            //await _tipoMensajeService.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al eliminar el tipo de mensaje", Error = ex.Message });
+            }
         }
-
-        //private bool TipoMensajeExists(int id)
-        //{
-        //    return _context.TipoMensajees.Any(e => e.Id == id);
-        //}
     }
 }

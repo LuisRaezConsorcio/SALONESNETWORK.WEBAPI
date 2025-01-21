@@ -29,117 +29,152 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
         // GET: api/Pais
         [HttpGet("GetPaises")]
-        public async Task<ActionResult<IEnumerable<Pais>>> GetPaises()
+        public async Task<IActionResult> GetPaises()
         {
-            //return await _context.Paises.ToListAsync();
-            IQueryable<Pais> queryContactoSQL = await _paisService.ObtenerTodos();
+            try
+            {
+                var queryContactoSQL = await _paisService.ObtenerTodos();
 
-            List<PaisDTO> lista = queryContactoSQL
-                                                     .Select(c => new PaisDTO()
-                                                     {
-                                                         Id = c.Id,
-                                                         Nombre = c.Nombre,
-                                                         FechaCreacion = c.FechaCreacion,
-                                                         UsuarioCreacion = c.UsuarioCreacion,
-                                                         FechaModificacion = c.FechaModificacion,
-                                                         UsuarioModificacion = c.UsuarioModificacion,
-                                                         Estado = c.Estado,
-                                                     }).ToList();
+                var lista = queryContactoSQL
+                    .Select(c => new PaisDTO
+                    {
+                        Id = c.Id,
+                        Nombre = c.Nombre,
+                        FechaCreacion = c.FechaCreacion,
+                        UsuarioCreacion = c.UsuarioCreacion,
+                        FechaModificacion = c.FechaModificacion,
+                        UsuarioModificacion = c.UsuarioModificacion,
+                        Estado = c.Estado,
+                    }).ToList();
 
-            return StatusCode(StatusCodes.Status200OK, lista);
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Países obtenidos exitosamente.", Datos = lista, Resultado = true });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al obtener los países.", Error= ex.Message });
+            }
         }
 
         // GET: api/Pais/5
         [HttpGet("GetPaisById")]
-        public async Task<ActionResult<Pais>> GetPaisById(int id)
+        public async Task<IActionResult> GetPaisById(int id)
         {
-            // Llama al servicio para obtener el registro por ID
-            var pais = await _paisService.ObtenerPorId(id);
-
-            // Verifica si el resultado es nulo
-            if (pais == null)
+            try
             {
-                return NotFound(new { mensaje = "El país no fue encontrado." });
+                var pais = await _paisService.ObtenerPorId(id);
+
+                if (pais == null)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El país no fue encontrado.", Resultado = false });
+                }
+
+                var paisDTO = new PaisDTO
+                {
+                    Id = pais.Id,
+                    Nombre = pais.Nombre,
+                    FechaCreacion = pais.FechaCreacion,
+                    UsuarioCreacion = pais.UsuarioCreacion,
+                    FechaModificacion = pais.FechaModificacion,
+                    UsuarioModificacion = pais.UsuarioModificacion,
+                    Estado = pais.Estado
+                };
+
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "País obtenido exitosamente.", Datos = paisDTO, Resultado = true });
             }
-
-            // Convierte la entidad a DTO
-            var paisDTO = new PaisDTO
+            catch (Exception ex)
             {
-                Id = pais.Id,
-                Nombre = pais.Nombre,
-                FechaCreacion = pais.FechaCreacion,
-                UsuarioCreacion = pais.UsuarioCreacion,
-                FechaModificacion = pais.FechaModificacion,
-                UsuarioModificacion = pais.UsuarioModificacion,
-                Estado = pais.Estado
-            };
-
-            // Retorna el DTO con un status 200
-            return Ok(paisDTO);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al obtener el país por ID.", Error= ex.Message });
+            }
         }
 
         // PUT: api/Pais/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("PutPais")]
         public async Task<IActionResult> PutPais(PaisDTO modelo)
         {
-            // Buscar el modelo existente en la base de datos
-            var paisExistente = await _paisService.ObtenerPorId(modelo.Id);
+            try
+            {
+                var paisExistente = await _paisService.ObtenerPorId(modelo.Id);
 
-            if (paisExistente == null)
-                return NotFound(new { mensaje = "El país no existe." });
+                if (paisExistente == null)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El país no existe.", Resultado = false });
+                }
 
-            // Actualizar solo las propiedades del modelo que tienen datos en el DTO
-            paisExistente.Nombre = modelo.Nombre ?? paisExistente.Nombre;
-            paisExistente.FechaModificacion = DateTime.Now;
-            paisExistente.UsuarioModificacion = modelo.UsuarioModificacion ?? paisExistente.UsuarioModificacion;
-            paisExistente.Estado = modelo.Estado ?? paisExistente.Estado;
+                paisExistente.Nombre = modelo.Nombre ?? paisExistente.Nombre;
+                paisExistente.FechaModificacion = DateTime.Now;
+                paisExistente.UsuarioModificacion = modelo.UsuarioModificacion ?? paisExistente.UsuarioModificacion;
+                paisExistente.Estado = modelo.Estado ?? paisExistente.Estado;
 
-            // Realizar la actualización
-            bool respuesta = await _paisService.Actualizar(paisExistente);
+                var respuesta = await _paisService.Actualizar(paisExistente);
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+                if (!respuesta)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo actualizar el pais.", Resultado = false });
+                }
+
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "El país fue actualizado exitosamente.", Resultado = respuesta });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al actualizar el país.", Error= ex.Message });
+            }
         }
 
         // POST: api/Pais
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("PostPais")]
         public async Task<IActionResult> PostPais(PaisDTO modelo)
         {
-
-            Pais NuevoModelo = new Pais()
+            try
             {
-                Nombre = modelo.Nombre,
-                FechaCreacion = DateTime.Now,
-                UsuarioCreacion = 1,
-                Estado = true
-            };
+                var nuevoModelo = new Pais
+                {
+                    Nombre = modelo.Nombre,
+                    FechaCreacion = DateTime.Now,
+                    UsuarioCreacion = modelo.UsuarioCreacion ?? 1,
+                    Estado = true
+                };
 
-            bool respuesta = await _paisService.Insertar(NuevoModelo);
+                var respuesta = await _paisService.Insertar(nuevoModelo);
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+                if (!respuesta)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo insertar el pais.", Resultado = false });
+                }
 
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "El país fue creado exitosamente.", Resultado = respuesta });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al crear el país.", Error= ex.Message });
+            }
         }
 
         // DELETE: api/Pais/5
         [HttpDelete("DeletePais")]
         public async Task<IActionResult> DeletePais(int id)
         {
-            var pais = await _paisService.ObtenerPorId(id);
-            if (pais == null)
+            try
             {
-                return NotFound();
+                var pais = await _paisService.ObtenerPorId(id);
+
+                if (pais == null)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El país no existe.", Resultado = false });
+                }
+
+                bool respuesta = await _paisService.Eliminar(id);
+
+                if (!respuesta)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo eliminar el pais.", Resultado = false });
+                }
+
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "El país fue eliminado exitosamente.", Resultado = respuesta });
             }
-
-            await _paisService.Eliminar(id);
-            //await _paisService.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al eliminar el país.", Error= ex.Message });
+            }
         }
-
-        //private bool PaisExists(int id)
-        //{
-        //    return _context.Paises.Any(e => e.Id == id);
-        //}
     }
 }

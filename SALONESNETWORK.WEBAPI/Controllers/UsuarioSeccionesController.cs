@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SALONESNETWORK.BLL.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
+using SALONESNETWORK.BLL.Services;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
 
@@ -16,116 +18,154 @@ namespace SALONESNETWORK.WEBAPI.Controllers
     [ApiController]
     public class UsuarioSeccionesController : ControllerBase
     {
-        //private readonly SalonesDbContext _context;
 
-        private readonly IUsuarioSeccionService _UsuarioSeccionService;
+        private readonly IUsuarioSeccionService _usuarioSeccionService;
 
-        public UsuarioSeccionesController(IUsuarioSeccionService UsuarioSeccionService)
+        public UsuarioSeccionesController(IUsuarioSeccionService usuarioSeccionService)
         {
-            _UsuarioSeccionService = UsuarioSeccionService;
+            _usuarioSeccionService = usuarioSeccionService;
         }
 
         // GET: api/UsuarioSeccion
         [HttpGet("GetUsuarioSecciones")]
-        public async Task<ActionResult<IEnumerable<UsuarioSeccion>>> GetUsuarioSecciones()
+        public async Task<IActionResult> GetUsuarioSecciones()
         {
-            //return await _context.UsuarioSecciones.ToListAsync();
-            IQueryable<UsuarioSeccion> queryContactoSQL = await _UsuarioSeccionService.ObtenerTodos();
+            try
+            {
+                IQueryable<UsuarioSeccion> query = await _usuarioSeccionService.ObtenerTodos();
 
-            List<UsuarioSeccionDTO> lista = queryContactoSQL
-                                                     .Select(c => new UsuarioSeccionDTO()
-                                                     {
-                                                         Id = c.Id,
-                                                         Id_Usuario = c.Id_Usuario,
-                                                         Id_Seccion = c.Id_Seccion
-                                                     }).ToList();
+                List<UsuarioSeccionDTO> lista = query.Select(c => new UsuarioSeccionDTO
+                {
+                    Id = c.Id,
+                    Id_Usuario = c.Id_Usuario,
+                    Id_Seccion = c.Id_Seccion,
+                    Estado = c.Estado
+                }).ToList();
 
-            return StatusCode(StatusCodes.Status200OK, lista);
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Lista de UsuarioSecciones obtenida correctamente.", Datos = lista, Resultado = true });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener las secciones de usuario.", Error = ex.Message });
+            }
         }
 
         // GET: api/UsuarioSeccion/5
         [HttpGet("GetUsuarioSeccionById")]
-        public async Task<ActionResult<UsuarioSeccion>> GetUsuarioSeccionById(int id)
+        public async Task<IActionResult> GetUsuarioSeccionById(int id)
         {
-            // Llama al servicio para obtener el registro por ID
-            var UsuarioSeccion = await _UsuarioSeccionService.ObtenerPorId(id);
-
-            // Verifica si el resultado es nulo
-            if (UsuarioSeccion == null)
+            try
             {
-                return NotFound(new { mensaje = "El país no fue encontrado." });
+                var usuarioSeccion = await _usuarioSeccionService.ObtenerPorId(id);
+
+                if (usuarioSeccion == null)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "La sección de usuario no fue encontrada.", Resultado = false });
+                }
+
+                var usuarioSeccionDTO = new UsuarioSeccionDTO
+                {
+                    Id = usuarioSeccion.Id,
+                    Id_Usuario = usuarioSeccion.Id_Usuario,
+                    Id_Seccion = usuarioSeccion.Id_Seccion,
+                    Estado = usuarioSeccion.Estado
+                };
+
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = " UsuarioSeccion obtenido correctamente.", Datos = usuarioSeccionDTO, Resultado = true });
             }
-
-            // Convierte la entidad a DTO
-            var UsuarioSeccionDTO = new UsuarioSeccionDTO
+            catch (Exception ex)
             {
-                Id = UsuarioSeccion.Id,
-                Id_Usuario = UsuarioSeccion.Id_Usuario,
-                Id_Seccion = UsuarioSeccion.Id_Seccion
-            };
-
-            // Retorna el DTO con un status 200
-            return Ok(UsuarioSeccionDTO);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener la sección de usuario.", Error = ex.Message });
+            }
         }
 
         // PUT: api/UsuarioSeccion/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("PutUsuarioSeccion")]
         public async Task<IActionResult> PutUsuarioSeccion(UsuarioSeccionDTO modelo)
         {
-            // Buscar el modelo existente en la base de datos
-            var UsuarioSeccionExistente = await _UsuarioSeccionService.ObtenerPorId(modelo.Id);
+            try
+            {
+                var usuarioSeccionExistente = await _usuarioSeccionService.ObtenerPorId(modelo.Id);
 
-            if (UsuarioSeccionExistente == null)
-                return NotFound(new { mensaje = "El país no existe." });
+                if (usuarioSeccionExistente == null)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "La sección de usuario no fue encontrada.", Resultado = false});
+                }
 
-            // Actualizar solo las propiedades del modelo que tienen datos en el DTO
-            UsuarioSeccionExistente.Id_Usuario = modelo.Id_Usuario ?? UsuarioSeccionExistente.Id_Usuario;
-            UsuarioSeccionExistente.Id_Seccion = modelo.Id_Seccion ?? UsuarioSeccionExistente.Id_Seccion;
+                usuarioSeccionExistente.Id_Usuario = modelo.Id_Usuario ?? usuarioSeccionExistente.Id_Usuario;
+                usuarioSeccionExistente.Id_Seccion = modelo.Id_Seccion ?? usuarioSeccionExistente.Id_Seccion;
+                usuarioSeccionExistente.Estado = modelo.Estado ?? usuarioSeccionExistente.Estado;
 
-            // Realizar la actualización
-            bool respuesta = await _UsuarioSeccionService.Actualizar(UsuarioSeccionExistente);
+                bool respuesta = await _usuarioSeccionService.Actualizar(usuarioSeccionExistente);
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+                if (!respuesta)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo actualizar la sección de usuario.", Resultado = false});
+                }
+
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Sección de usuario actualizada con éxito.", Resultado = true });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al actualizar la sección de usuario.", Error = ex.Message });
+            }
         }
 
         // POST: api/UsuarioSeccion
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("PostUsuarioSeccion")]
         public async Task<IActionResult> PostUsuarioSeccion(UsuarioSeccionDTO modelo)
         {
-
-            UsuarioSeccion NuevoModelo = new UsuarioSeccion()
+            try
             {
-                Id_Usuario = modelo.Id_Usuario,
-                Id_Seccion = modelo.Id_Seccion
-            };
+                UsuarioSeccion nuevoModelo = new UsuarioSeccion
+                {
+                    Id_Usuario = modelo.Id_Usuario,
+                    Id_Seccion = modelo.Id_Seccion,
+                    Estado = true
+                };
 
-            bool respuesta = await _UsuarioSeccionService.Insertar(NuevoModelo);
+                bool respuesta = await _usuarioSeccionService.Insertar(nuevoModelo);
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+                if (!respuesta)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo crear la sección de usuario.", Resultado = false });
+                }
 
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Sección de usuario creada con éxito.", Resultado = respuesta });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al crear la sección de usuario.", Error = ex.Message });
+            }
         }
 
         // DELETE: api/UsuarioSeccion/5
         [HttpDelete("DeleteUsuarioSeccion")]
         public async Task<IActionResult> DeleteUsuarioSeccion(int id)
         {
-            var UsuarioSeccion = await _UsuarioSeccionService.ObtenerPorId(id);
-            if (UsuarioSeccion == null)
+            try
             {
-                return NotFound();
+                var usuarioSeccion = await _usuarioSeccionService.ObtenerPorId(id);
+
+                if (usuarioSeccion == null)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "La sección de usuario no fue encontrada.", Resultado = false});
+                }
+
+                bool respuesta = await _usuarioSeccionService.Eliminar(id);
+
+                if (!respuesta)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo eliminar la sección de usuario.", Resultado = false });
+                }
+
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Sección de usuario eliminada con éxito.", Resultado = respuesta });
             }
-
-            await _UsuarioSeccionService.Eliminar(id);
-            //await _UsuarioSeccionService.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al eliminar la sección de usuario.", Error= ex.Message });
+            }
         }
 
-        //private bool UsuarioSeccionExists(int id)
-        //{
-        //    return _context.UsuarioSecciones.Any(e => e.Id == id);
-        //}
     }
 }

@@ -40,17 +40,17 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                     Id_Perfil = c.Id_Perfil
                 }).ToList();
 
-                return StatusCode(StatusCodes.Status200OK, new { valor = lista, mensaje = "Lista obtenida correctamente." });
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Lista obtenida correctamente.", Datos = lista, Resultado = true });
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = "Error al obtener la lista.", detalle = ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al obtener la lista.", Error= ex.Message });
             }
         }
 
         // GET: api/GetUsuarioPerfilById/5
         [HttpGet("GetUsuarioPerfilIdByUsuarioPerfil")]
-        public async Task<ActionResult> GetUsuarioPerfilIdByUsuarioPerfil(UsuarioPerfilDTO modelo)
+        public async Task<IActionResult> GetUsuarioPerfilIdByUsuarioPerfil(UsuarioPerfilDTO modelo)
         {
             try
             {
@@ -64,20 +64,20 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (UsuarioPerfilId == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { valor = UsuarioPerfilId, mensaje = "No hay un Usuario con el Perfil consultado." });
+                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "No hay un Usuario con el Perfil consultado.", Resultado = false });
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { valor = UsuarioPerfilId, mensaje = "Id encontrado." });
+                return StatusCode(StatusCodes.Status200OK, new {  Mensaje = "Id encontrado.",Datos = UsuarioPerfilId, Resultado = true, });
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = "Error al obtener el ID.", detalle = ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al obtener el ID.", Error= ex.Message });
             }
         }
         
         // GET: api/UsuarioPerfil/5
         [HttpGet("GetUsuarioPerfilByUsuario")]
-        public async Task<ActionResult<IEnumerable<UsuarioPerfil>>> GetUsuarioPerfilByUsuario(int idusuario)
+        public async Task<IActionResult> GetUsuarioPerfilByUsuario(int idusuario)
         {
 
             try
@@ -96,19 +96,18 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                     Id_Perfil = c.Id_Perfil
                 }).ToList();
 
-                return StatusCode(StatusCodes.Status200OK, new { valor = lista, mensaje = "Perfiles obtenidos correctamente." });
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Perfiles obtenidos correctamente.", Datos = lista, Resultado = lista});
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = "Error al obtener los perfiles.", detalle = ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al obtener los perfiles.", Error= ex.Message });
             }
         }
 
         // GET: api/GetUsuarioPerfilByPerfil/5
         [HttpGet("GetUsuarioPerfilByPerfil")]
-        public async Task<ActionResult<IEnumerable<UsuarioPerfil>>> GetUsuarioPerfilByPerfil(int idperfil)
+        public async Task<IActionResult> GetUsuarioPerfilByPerfil(int idperfil)
         {
-
             try
             {
                 UsuarioPerfil NuevoModelo = new UsuarioPerfil
@@ -125,41 +124,13 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                     Id_Perfil = c.Id_Perfil
                 }).ToList();
 
-                return StatusCode(StatusCodes.Status200OK, new { valor = lista, mensaje = "Perfiles obtenidos correctamente." });
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Perfiles obtenidos correctamente.", Datos = lista, Resultado = true});
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = "Error al obtener los perfiles.", detalle = ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al obtener los perfiles.", Error= ex.Message });
             }
         }
-
-        //PUT: api/UsuarioPerfil/5
-        //  To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("PutUsuarioPerfil")]
-        //public async Task<IActionResult> PutUsuarioPerfil(UsuarioPerfilDTO modelo)
-        //{
-
-        //    UsuarioPerfil NuevoModelo = new UsuarioPerfil()
-        //    {
-        //        Id_Usuario = modelo.Id_Usuario,
-        //        Id_Perfil = modelo.Id_Perfil
-        //    };
-
-        //    //Buscar el modelo existente en la base de datos
-        //    var UsuarioPerfilExistente = await _usuarioPerfilService.ObtenerPorId(NuevoModelo);
-
-        //    if (UsuarioPerfilExistente == null)
-        //        return NotFound(new { mensaje = "El país no existe." });
-
-        //    //Actualizar solo las propiedades del modelo que tienen datos en el DTO
-        //    UsuarioPerfilExistente.Id_Usuario = modelo.Id_Usuario ?? UsuarioPerfilExistente.Id_Usuario;
-        //    UsuarioPerfilExistente.Id_Perfil = modelo.Id_Perfil ?? UsuarioPerfilExistente.Id_Perfil;
-
-        //    //Realizar la actualización
-        //    bool respuesta = await _usuarioPerfilService.Actualizar(UsuarioPerfilExistente);
-
-        //    return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
-        //}
 
         // DELETE: api/UsuarioPerfil/5
         [HttpDelete("DeleteUsuarioPerfil")]
@@ -167,16 +138,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
         {
             if (modelo == null || modelo.Id_Usuario <= 0 || modelo.Id_Perfil <= 0)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, new
-                {
-                    mensaje = "Los datos proporcionados no son válidos. Asegúrese de enviar un usuario y perfil válidos."
-                });
+                return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "Los datos proporcionados no son válidos. Asegúrese de enviar un usuario y perfil válidos.", Resultado = false });
             }
 
             UsuarioPerfil nuevoModelo = new UsuarioPerfil
             {
                 Id_Usuario = modelo.Id_Usuario,
-                Id_Perfil = modelo.Id_Perfil
+                Id_Perfil = modelo.Id_Perfil,
+                Estado = modelo.Estado
             };
 
             try
@@ -185,35 +154,21 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (usuarioPerfilId == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new
-                    {
-                        mensaje = "No se encontró un usuario-perfil con los datos proporcionados."
-                    });
+                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "No se encontró un usuario-perfil con los datos proporcionados.", Resultado = false });
                 }
 
-                bool eliminado = await _usuarioPerfilService.Eliminar(usuarioPerfilId.Value);
+                bool respuesta = await _usuarioPerfilService.Eliminar(usuarioPerfilId.Value);
 
-                if (!eliminado)
+                if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status500InternalServerError, new
-                    {
-                        mensaje = "Ocurrió un problema al intentar eliminar el usuario-perfil."
-                    });
+                    return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un problema al intentar eliminar el usuario-perfil.", Resultado = false });
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new
-                {
-                    mensaje = "El usuario-perfil se eliminó correctamente.",
-                    id = usuarioPerfilId
-                });
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "El usuario-perfil se eliminó correctamente.", Resultado = respuesta });
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new
-                {
-                    mensaje = "Ocurrió un error inesperado al procesar la solicitud.",
-                    detalle = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error inesperado al procesar la solicitud.", Error= ex.Message });
             }
         }
 
@@ -223,40 +178,23 @@ namespace SALONESNETWORK.WEBAPI.Controllers
         {
             if (idUsuario <= 0)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, new
-                {
-                    valor = idUsuario,
-                    mensaje = "El ID de usuario debe ser un número positivo."
-                });
+                return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "El ID de usuario debe ser un número positivo.", Resultado = false });
             }
 
             try
             {
-                bool eliminado = await _usuarioPerfilService.EliminarPorUsuario(idUsuario);
+                bool respuesta = await _usuarioPerfilService.EliminarPorUsuario(idUsuario);
 
-                if (!eliminado)
+                if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new
-                    {
-                        valor = idUsuario,
-                        mensaje = $"No se encontraron perfiles asociados al usuario con ID {idUsuario}."
-                    });
+                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = $"No se encontraron perfiles asociados al usuario con ID {idUsuario}.", Resultado = false });
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new
-                {
-                    valor = idUsuario,
-                    mensaje = "Todos los perfiles del usuario han sido eliminados correctamente."
-                });
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Todos los perfiles del usuario han sido eliminados correctamente.", Resultado = respuesta });
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new
-                {
-                    valor = idUsuario,
-                    mensaje = "Ocurrió un error inesperado al procesar la solicitud.",
-                    detalle = ex.Message
-                });
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error inesperado al procesar la solicitud.", Error= ex.Message });
             }
         }
 
@@ -267,23 +205,22 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
             try
             {
-                bool eliminado = await _usuarioPerfilService.EliminarPorPerfil(idPerfil);
+                bool respuesta = await _usuarioPerfilService.EliminarPorPerfil(idPerfil);
 
-                if (!eliminado)
+                if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { valor = idPerfil, mensaje = $"No se encontraron perfiles asociados al perfil con ID {idPerfil}." });
+                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = $"No se encontraron perfiles asociados al perfil con ID {idPerfil}.", Resultado = false });
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { valor = idPerfil, mensaje = "Todos los perfiles del perfil han sido eliminados correctamente." });
+                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Todos los perfiles del perfil han sido eliminados correctamente.", Resultado = respuesta });
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { valor = idPerfil, mensaje = "Error al eliminar los perfiles.", detalle = ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al eliminar los perfiles.", Error= ex.Message });
             }
         }
 
         // POST: api/UsuarioPerfil
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("PostUsuarioPerfil")]
         public async Task<IActionResult> PostUsuarioPerfil(UsuarioPerfilDTO modelo)
         {
@@ -300,14 +237,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { mensaje = "No se pudo insertar el perfil de usuario." });
+                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo insertar el perfil porque el usuario ya cuenta con él.", Resultado = false });
                 }
 
-                return StatusCode(StatusCodes.Status201Created, new { valor = modelo, mensaje = "Perfil de usuario creado correctamente." });
+                return StatusCode(StatusCodes.Status201Created, new { Mensaje = "Perfil de usuario creado correctamente.", Resultado = respuesta });
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { mensaje = "Error al crear el perfil de usuario.", detalle = ex.Message });
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al crear el perfil de usuario.", Error= ex.Message });
             }
         }
 
