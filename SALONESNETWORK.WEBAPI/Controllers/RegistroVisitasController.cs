@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SALONESNETWORK.BLL.DTOs;
+using SALONESNETWORK.MODELS.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
+using SALONESNETWORK.BLL.Helpers;
 
 namespace SALONESNETWORK.WEBAPI.Controllers
 {
@@ -16,7 +17,6 @@ namespace SALONESNETWORK.WEBAPI.Controllers
     [ApiController]
     public class RegistroVisitasController : ControllerBase
     {
-        //private readonly SalonesDbContext _context;
 
         private readonly IRegistroVisitaService _registroVisitaService;
 
@@ -27,7 +27,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
         // GET: api/RegistroVisita/5
         [HttpGet("GetRegistroVisitaByUserId")]
-        public async Task<ActionResult<RegistroVisita>> GetRegistroVisitaByUserId(RegistroVisita modelo)
+        public async Task<IActionResult> GetRegistroVisitaByUserId(RegistroVisita modelo)
         {
             try
             {
@@ -35,7 +35,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (registroVisita == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El registro de visita no fue encontrado.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El registro de visita no fue encontrado.");
                 }
 
                 var registroVisitaDTO = new RegistroVisitaDTO
@@ -46,11 +46,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                     Ip = registroVisita.Ip
                 };
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Registro de visita encontrado.", Datos = registroVisitaDTO, Resultado = true });
+                return ResponseHelper.Success(registroVisitaDTO, "Registro de visita obtenido correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener el registro de visita.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -72,13 +72,13 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                 bool respuesta = await _registroVisitaService.Insertar(nuevoModelo);
 
                 if (!respuesta)
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo registrar la visita.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo registrar la visita.");
 
-                return StatusCode(StatusCodes.Status201Created, new { Mensaje = "Registro de visita creado con éxito.", Resultado = respuesta });
+                return ResponseHelper.Success("Registro de visita creado con éxito.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al registrar la visita.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
 
         }
@@ -96,20 +96,20 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                 var registroVisita = await _registroVisitaService.ObtenerPorIdUsuario(nuevoModelo);
 
                 if (registroVisita == null)
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El registro de visita no fue encontrado.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El registro de visita no fue encontrado.");
 
 
                 bool respuesta = await _registroVisitaService.Eliminar(registroVisita.Id);
 
                 if (!respuesta)
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo eliminar el registro de visita.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo eliminar el registro de visita.");
 
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Registro de visita eliminado con éxito.", Resultado = respuesta });
+                return ResponseHelper.Success("Registro de visita eliminado con éxito.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al eliminar el registro de visita.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 

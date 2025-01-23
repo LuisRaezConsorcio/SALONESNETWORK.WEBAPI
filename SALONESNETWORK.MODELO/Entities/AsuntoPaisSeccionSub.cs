@@ -21,6 +21,10 @@ namespace SALONESNETWORK.MODELS.Entities
         public int? Id_SubSeccion { get; set; } // FK a SubSeccion
         public SubSeccion? SubSeccion { get; set; }
 
+        public DateTime? FechaCreacion { get; set; }
+        public int? UsuarioCreacion { get; set; }
+        public DateTime? FechaModificacion { get; set; }
+        public int? UsuarioModificacion { get; set; }
         public Boolean? Estado { get; set; }
     }
 }

@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SALONESNETWORK.BLL.DTOs;
+using SALONESNETWORK.MODELS.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.BLL.Services;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
+using SALONESNETWORK.BLL.Helpers;
 
 namespace SALONESNETWORK.WEBAPI.Controllers
 {
@@ -42,11 +43,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                     Estado = c.Estado
                 }).ToList();
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Lista de UsuarioSecciones obtenida correctamente.", Datos = lista, Resultado = true });
+                return ResponseHelper.Success(lista, "Lista de UsuarioSecciones obtenida correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener las secciones de usuario.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -60,7 +61,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (usuarioSeccion == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "La sección de usuario no fue encontrada.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("La sección de usuario no fue encontrada.");
                 }
 
                 var usuarioSeccionDTO = new UsuarioSeccionDTO
@@ -71,11 +72,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                     Estado = usuarioSeccion.Estado
                 };
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = " UsuarioSeccion obtenido correctamente.", Datos = usuarioSeccionDTO, Resultado = true });
+                return ResponseHelper.Success(usuarioSeccionDTO, "UsuarioSeccion obtenido correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener la sección de usuario.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -89,7 +90,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (usuarioSeccionExistente == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "La sección de usuario no fue encontrada.", Resultado = false});
+                    return ResponseHelper.NotFoundResponse("La sección de usuario no fue encontrada.");
                 }
 
                 usuarioSeccionExistente.Id_Usuario = modelo.Id_Usuario ?? usuarioSeccionExistente.Id_Usuario;
@@ -100,14 +101,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo actualizar la sección de usuario.", Resultado = false});
+                    return ResponseHelper.BadRequestResponse("No se pudo actualizar la sección de usuario.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Sección de usuario actualizada con éxito.", Resultado = true });
+                return ResponseHelper.Success("Sección de usuario actualizada con éxito.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al actualizar la sección de usuario.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -128,14 +129,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo crear la sección de usuario.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo crear la sección de usuario.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Sección de usuario creada con éxito.", Resultado = respuesta });
+                return ResponseHelper.Success("Sección de usuario creada con éxito.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al crear la sección de usuario.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -149,21 +150,21 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (usuarioSeccion == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "La sección de usuario no fue encontrada.", Resultado = false});
+                    return ResponseHelper.NotFoundResponse("La sección de usuario no fue encontrada.");
                 }
 
                 bool respuesta = await _usuarioSeccionService.Eliminar(id);
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo eliminar la sección de usuario.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo eliminar la sección de usuario.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Sección de usuario eliminada con éxito.", Resultado = respuesta });
+                return ResponseHelper.Success("Sección de usuario eliminada con éxito.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al eliminar la sección de usuario.", Error= ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 

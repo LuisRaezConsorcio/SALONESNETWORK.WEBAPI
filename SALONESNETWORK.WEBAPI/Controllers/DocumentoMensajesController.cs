@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SALONESNETWORK.BLL.DTOs;
+using SALONESNETWORK.MODELS.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
+using SALONESNETWORK.BLL.Helpers;
 
 namespace SALONESNETWORK.WEBAPI.Controllers
 {
@@ -16,7 +17,6 @@ namespace SALONESNETWORK.WEBAPI.Controllers
     [ApiController]
     public class DocumentoMensajesController : ControllerBase
     {
-        //private readonly SalonesDbContext _context;
 
         private readonly IDocumentoMensajeService _documentoMensajeService;
 
@@ -41,11 +41,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                         Id_Documento = c.Id_Documento
                     }).ToList();
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Lista de documentos de mensajes obtenida correctamente.", Datos = lista, Resultado = true });
+                return ResponseHelper.Success(lista, "Lista de documentos de mensajes obtenida correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener los documentos de mensajes.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -59,7 +59,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (DocumentoMensaje == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El documento de mensaje no fue encontrado.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El documento de mensaje no fue encontrado.");
                 }
 
                 var DocumentoMensajeDTO = new DocumentoMensajeDTO
@@ -69,11 +69,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                     Id_Documento = DocumentoMensaje.Id_Documento
                 };
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Documento de mensaje obtenido correctamente.", Datos = DocumentoMensajeDTO, Resultado = true });
+                return ResponseHelper.Success(DocumentoMensajeDTO, "Documento de mensaje obtenido correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener el documento de mensaje por ID.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -87,7 +87,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (DocumentoMensajeExistente == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El documento de mensaje no existe.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El documento de mensaje no existe.");
                 }
 
                 DocumentoMensajeExistente.Id_Mensaje = modelo.Id_Mensaje ?? DocumentoMensajeExistente.Id_Mensaje;
@@ -97,14 +97,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo actualizar el registro.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo actualizar el registro.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Documento de mensaje actualizado correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("Documento de mensaje actualizado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al actualizar el documento de mensaje.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -124,14 +124,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo insertar el registro.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo insertar el registro.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Documento de mensaje creado correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("Documento de mensaje creado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al crear el documento de mensaje.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -145,21 +145,21 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (DocumentoMensaje == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El documento de mensaje no fue encontrado.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El documento de mensaje no fue encontrado.");
                 }
 
                 bool respuesta = await _documentoMensajeService.Eliminar(id);
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo eliminar el registro.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo eliminar el registro.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Documento de mensaje eliminado correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("Documento de mensaje eliminado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al eliminar el documento de mensaje.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 

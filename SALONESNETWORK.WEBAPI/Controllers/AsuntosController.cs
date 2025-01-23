@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SALONESNETWORK.BLL.DTOs;
+using SALONESNETWORK.MODELS.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
+using SALONESNETWORK.BLL.Helpers;
 
 namespace SALONESNETWORK.WEBAPI.Controllers
 {
@@ -45,11 +46,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                                              Estado = c.Estado,
                                          }).ToList();
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Lista de asuntos obtenida correctamente.", Datos = lista, Resultado = true });
+                return ResponseHelper.Success(lista, "Lista de asuntos obtenida correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener los asuntos.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -63,7 +64,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (Asunto == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El asunto no fue encontrado.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El asunto no fue encontrado.");
                 }
 
                 var AsuntoDTO = new AsuntoDTO
@@ -78,11 +79,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                     Estado = Asunto.Estado
                 };
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Asunto obtenido correctamente.", Datos = AsuntoDTO, Resultado=true });
+                return ResponseHelper.Success(AsuntoDTO, "Asunto obtenido correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener el asunto por ID.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -96,27 +97,27 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (AsuntoExistente == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El asunto no existe.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El asunto no fue encontrado.");
                 }
 
                 AsuntoExistente.Nombre = modelo.Nombre ?? AsuntoExistente.Nombre;
                 AsuntoExistente.Descripcion = modelo.Descripcion ?? AsuntoExistente.Descripcion;
                 AsuntoExistente.FechaModificacion = DateTime.Now;
                 AsuntoExistente.UsuarioModificacion = 1;
-                AsuntoExistente.Estado = modelo.Estado ?? AsuntoExistente.Estado;
+                AsuntoExistente.Estado = true;
 
                 bool respuesta = await _asuntoService.Actualizar(AsuntoExistente);
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo actualizar el asunto.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo actualizar el asunto.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Asunto actualizado correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("Asunto actualizado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al actualizar el asunto.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -140,14 +141,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo insertar el asunto.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo insertar el asunto.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Asunto creado correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("Asunto creado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al crear el asunto.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
 
         }
@@ -162,21 +163,21 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (Asunto == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El asunto no fue encontrado.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El asunto no fue encontrado.");
                 }
 
                 bool respuesta = await _asuntoService.Eliminar(id);
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo eliminar el asunto.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo eliminar el asunto.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "El asunto fue eliminado correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("El asunto fue eliminado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al eliminar el asunto.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
     }

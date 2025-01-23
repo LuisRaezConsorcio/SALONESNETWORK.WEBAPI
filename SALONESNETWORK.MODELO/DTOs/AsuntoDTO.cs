@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SALONESNETWORK.BLL.DTOs
+namespace SALONESNETWORK.MODELS.DTOs
 {
-    public class SubSeccionDTO
+    public class AsuntoDTO
     {
         public int Id { get; set; }
         public string? Nombre { get; set; }

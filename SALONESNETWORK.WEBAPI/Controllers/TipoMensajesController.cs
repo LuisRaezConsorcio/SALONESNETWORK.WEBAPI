@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SALONESNETWORK.BLL.DTOs;
+using SALONESNETWORK.MODELS.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
+using SALONESNETWORK.BLL.Helpers;
 
 namespace SALONESNETWORK.WEBAPI.Controllers
 {
@@ -16,7 +17,6 @@ namespace SALONESNETWORK.WEBAPI.Controllers
     [ApiController]
     public class TipoMensajesController : ControllerBase
     {
-        //private readonly SalonesDbContext _context;
 
         private readonly ITipoMensajeService _tipoMensajeService;
 
@@ -46,11 +46,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                         Estado = c.Estado,
                     }).ToList();
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Los tipomensajes fueron obtenidos correctamente.", Datos = lista, Resultado = true });
+                return ResponseHelper.Success(lista, "Los tipomensajes fueron obtenidos correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener los tipos de mensaje", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -64,7 +64,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (tipoMensaje == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El tipo de mensaje no fue encontrado.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El tipo de mensaje no fue encontrado.");
                 }
 
                 var tipoMensajeDTO = new TipoMensajeDTO
@@ -79,11 +79,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                     Estado = tipoMensaje.Estado
                 };
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "El tipoMensaje fue encontrado correctamente", Datos = tipoMensajeDTO, Resultado = true });
+                return ResponseHelper.Success(tipoMensajeDTO, "El tipoMensaje fue encontrado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener el tipo de mensaje", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -97,7 +97,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (tipoMensajeExistente == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El tipo de mensaje no existe.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El tipo de mensaje no fue encontrado.");
                 }
 
                 tipoMensajeExistente.Nombre = modelo.Nombre ?? tipoMensajeExistente.Nombre;
@@ -110,14 +110,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo actualizar el registro.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo actualizar el registro.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Actualización exitosa.", Resultado = respuesta });
+                return ResponseHelper.Success("Registro actualizado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new {Mensaje = $"Ocurrió un error al actualizar el tipo de mensaje", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -140,14 +140,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo insertar el registro.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo insertar el registro.");
                 }
 
-                return StatusCode(StatusCodes.Status201Created, new { Mensaje = "Registro exitoso.", Resultado = respuesta });
+                return ResponseHelper.Success("Registro insertado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al registrar el tipo de mensaje", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -161,21 +161,21 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (tipoMensaje == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El tipo de mensaje no existe.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El tipo de mensaje no fue encontrado.");
                 }
 
                 bool respuesta = await _tipoMensajeService.Eliminar(id);
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo eliminar el registro.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("\"No se pudo eliminar el registro.");
                 }
 
-                return StatusCode(StatusCodes.Status204NoContent, new { Mensaje = "Eliminación exitosa.", Resultado = respuesta });
+                return ResponseHelper.Success("Registro eliminado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al eliminar el tipo de mensaje", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
     }

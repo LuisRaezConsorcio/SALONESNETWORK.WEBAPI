@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SALONESNETWORK.DAL.Data;
 
@@ -11,9 +12,11 @@ using SALONESNETWORK.DAL.Data;
 namespace SALONESNETWORK.DAL.Migrations
 {
     [DbContext(typeof(SalonesDbContext))]
-    partial class SalonesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250122142031_NovenaCarga")]
+    partial class NovenaCarga
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -67,12 +70,6 @@ namespace SALONESNETWORK.DAL.Migrations
                     b.Property<bool?>("Estado")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTime?>("FechaCreacion")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("FechaModificacion")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<int?>("Id_Asunto")
                         .HasColumnType("int");
 
@@ -83,12 +80,6 @@ namespace SALONESNETWORK.DAL.Migrations
                         .HasColumnType("int");
 
                     b.Property<int?>("Id_SubSeccion")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UsuarioCreacion")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UsuarioModificacion")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -276,22 +267,10 @@ namespace SALONESNETWORK.DAL.Migrations
                     b.Property<bool?>("Estado")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTime?>("FechaCreacion")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("FechaModificacion")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<int?>("Id_Perfil")
                         .HasColumnType("int");
 
                     b.Property<int?>("Id_Seccion")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UsuarioCreacion")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UsuarioModificacion")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -438,12 +417,6 @@ namespace SALONESNETWORK.DAL.Migrations
                     b.Property<bool?>("Estado")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTime?>("FechaCreacion")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("FechaModificacion")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<int?>("Id_Asunto")
                         .HasColumnType("int");
 
@@ -457,12 +430,6 @@ namespace SALONESNETWORK.DAL.Migrations
                         .HasColumnType("int");
 
                     b.Property<int?>("Id_SubSeccion")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UsuarioCreacion")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UsuarioModificacion")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -497,12 +464,6 @@ namespace SALONESNETWORK.DAL.Migrations
                     b.Property<bool?>("Estado")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTime?>("FechaCreacion")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("FechaModificacion")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<string>("FirstName")
                         .HasColumnType("longtext");
 
@@ -533,12 +494,6 @@ namespace SALONESNETWORK.DAL.Migrations
                     b.Property<string>("UserName")
                         .HasColumnType("longtext");
 
-                    b.Property<int?>("UsuarioCreacion")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UsuarioModificacion")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.ToTable("Usuarios");
@@ -555,22 +510,10 @@ namespace SALONESNETWORK.DAL.Migrations
                     b.Property<bool?>("Estado")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTime?>("FechaCreacion")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("FechaModificacion")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<int?>("Id_Perfil")
                         .HasColumnType("int");
 
                     b.Property<int?>("Id_Usuario")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UsuarioCreacion")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UsuarioModificacion")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -593,22 +536,10 @@ namespace SALONESNETWORK.DAL.Migrations
                     b.Property<bool?>("Estado")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTime?>("FechaCreacion")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime?>("FechaModificacion")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<int?>("Id_Seccion")
                         .HasColumnType("int");
 
                     b.Property<int?>("Id_Usuario")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UsuarioCreacion")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UsuarioModificacion")
                         .HasColumnType("int");
 
                     b.HasKey("Id");

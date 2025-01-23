@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SALONESNETWORK.BLL.DTOs;
+using SALONESNETWORK.MODELS.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
+using SALONESNETWORK.BLL.Helpers;
 
 namespace SALONESNETWORK.WEBAPI.Controllers
 {
@@ -16,7 +17,6 @@ namespace SALONESNETWORK.WEBAPI.Controllers
     [ApiController]
     public class PerfilController : ControllerBase
     {
-        //private readonly SalonesDbContext _context;
 
         private readonly IPerfilService _perfilService;
 
@@ -45,11 +45,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                         Estado = c.Estado,
                     }).ToList();
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Perfiles obtenidos correctamente.", Datos = lista, Resultado = true });
+                return ResponseHelper.Success(lista, "Perfiles obtenidos correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al obtener los perfiles.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -63,7 +63,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (perfil == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El perfil no fue encontrado.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El perfil no fue encontrado.");
                 }
 
                 var perfilDTO = new PerfilDTO
@@ -78,11 +78,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                     Estado = perfil.Estado
                 };
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Perfil obtenido correctamente.", Datos = perfilDTO, Resultado = true });
+                return ResponseHelper.Success(perfilDTO, "Perfil obtenido correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al obtener el perfil.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -96,7 +96,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (perfilExistente == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El perfil no existe.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El perfil no fue encontrado.");
                 }
 
                 perfilExistente.Nombre = modelo.Nombre ?? perfilExistente.Nombre;
@@ -109,14 +109,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo actualizar el perfil.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo actualizar el perfil.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Perfil actualizado correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("Perfil actualizado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al actualizar el perfil.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -139,14 +139,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo insertar el perfil.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo insertar el perfil.");
                 }
 
-                return StatusCode(StatusCodes.Status201Created, new { Mensaje = "Perfil creado correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("Perfil creado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al crear el perfil.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -160,21 +160,21 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (perfil == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El perfil no fue encontrado.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El perfil no fue encontrado.");
                 }
 
                 bool respuesta = await _perfilService.Eliminar(id);
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo eliminar el perfil.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo eliminar el perfil.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Perfil eliminado correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("Perfil eliminado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al eliminar el perfil.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
     }

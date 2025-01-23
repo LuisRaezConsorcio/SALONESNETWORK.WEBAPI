@@ -7,10 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.Elfie.Serialization;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Common;
-using SALONESNETWORK.BLL.DTOs;
+using SALONESNETWORK.MODELS.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
+using SALONESNETWORK.BLL.Helpers;
 
 namespace SALONESNETWORK.WEBAPI.Controllers
 {
@@ -51,11 +52,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                     Estado = c.Estado
                 }).ToList();
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Usuarios obtenidos correctamente.", Datos = lista, Resultado = true });
+                return ResponseHelper.Success(lista, "Usuarios obtenidos correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al obtener los usuarios.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -68,7 +69,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                 var usuario = await _usuarioService.ObtenerPorId(id);
                 if (usuario == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El usuario no fue encontrado.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El usuario no fue encontrado.");
                 }
 
                 var usuarioDTO = new UsuarioDTO
@@ -89,11 +90,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                     Estado = usuario.Estado
                 };
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Usuario obtenido correctamente.", Datos = usuarioDTO, Resultado = true });
+                return ResponseHelper.Success(usuarioDTO, "Usuario obtenido correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al obtener el usuario.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -106,7 +107,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                 var usuarioExistente = await _usuarioService.ObtenerPorId(modelo.Id);
                 if (usuarioExistente == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El usuario no existe." });
+                    return ResponseHelper.NotFoundResponse("El usuario no fue encontrado.");//{ mensaje = "El usuario no existe." });
                 }
 
                 usuarioExistente.FirstName = modelo.FirstName ?? usuarioExistente.FirstName;
@@ -127,14 +128,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo actualizar el usuario.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo actualizar el usuario.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Usuario actualizado correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("Usuario actualizado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al actualizar el usuario.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -165,14 +166,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo insertar el usuario.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo insertar el usuario.");
                 }
 
-                return StatusCode(StatusCodes.Status201Created, new { Mensaje = "Usuario creado correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("Usuario creado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al crear el usuario.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
 
         }
@@ -186,21 +187,21 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                 var usuario = await _usuarioService.ObtenerPorId(id);
                 if (usuario == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El usuario no fue encontrado.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El usuario no fue encontrado.");
                 }
 
                 bool respuesta = await _usuarioService.Eliminar(id);
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo eliminar el usuario.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo eliminar el usuario.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Usuario eliminado correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("Usuario eliminado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al eliminar el usuario.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
     }

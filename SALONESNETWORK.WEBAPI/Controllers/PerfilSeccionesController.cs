@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SALONESNETWORK.BLL.DTOs;
+using SALONESNETWORK.MODELS.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
+using SALONESNETWORK.BLL.Helpers;
 
 namespace SALONESNETWORK.WEBAPI.Controllers
 {
@@ -16,7 +17,6 @@ namespace SALONESNETWORK.WEBAPI.Controllers
     [ApiController]
     public class PerfilSeccionesController : ControllerBase
     {
-        //private readonly SalonesDbContext _context;
 
         private readonly IPerfilSeccionService _perfilSeccionService;
 
@@ -41,11 +41,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                         Estado = c.Estado
                     }).ToList();
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "PerfilSecciones obtenidas correctamente.", Datos = lista, Resultado = true });
+                return ResponseHelper.Success(lista, "PerfilSecciones obtenidos correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al obtener las PerfilSecciones.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -59,7 +59,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (perfilSeccion == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "La PerfilSeccion no fue encontrada.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El PerfilSeccion no fue encontrado.");
                 }
 
                 var perfilSeccionDTO = new PerfilSeccionDTO
@@ -70,11 +70,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                     Estado = perfilSeccion.Estado
                 };
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "PerfilSeccion obtenida correctamente.", Datos = perfilSeccionDTO, Resultado = true });
+                return ResponseHelper.Success(perfilSeccionDTO, "PerfilSeccion obtenido correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al obtener la PerfilSeccion.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -88,7 +88,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (perfilSeccionExistente == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "La PerfilSeccion no existe.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El PerfilSeccion no fue encontrado.");
                 }
 
                 perfilSeccionExistente.Id_Seccion = modelo.Id_Seccion ?? perfilSeccionExistente.Id_Seccion;
@@ -99,14 +99,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo actualizar el registro.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo actualizar el registro.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "PerfilSeccion actualizada correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("PerfilSeccion actualizado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al actualizar la PerfilSeccion.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -127,14 +127,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo insertar el registro.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo insertar el registro.");
                 }
 
-                return StatusCode(StatusCodes.Status201Created, new { Mensaje = "PerfilSeccion creada correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("PerfilSeccion creada correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al crear la PerfilSeccion.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -148,21 +148,21 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (perfilSeccion == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "La PerfilSeccion no fue encontrada.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El PerfilSeccion no fue encontrado.");
                 }
 
                 bool respuesta = await _perfilSeccionService.Eliminar(id);
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo eliminar el regsitro.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo eliminar el regsitro.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "PerfilSeccion eliminada correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("PerfilSeccion eliminado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al eliminar la PerfilSeccion.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
     }

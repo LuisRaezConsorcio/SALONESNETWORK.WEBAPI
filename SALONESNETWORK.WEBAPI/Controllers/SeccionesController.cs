@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SALONESNETWORK.BLL.DTOs;
+using SALONESNETWORK.MODELS.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
+using SALONESNETWORK.BLL.Helpers;
 
 namespace SALONESNETWORK.WEBAPI.Controllers
 {
@@ -16,7 +17,6 @@ namespace SALONESNETWORK.WEBAPI.Controllers
     [ApiController]
     public class SeccionesController : ControllerBase
     {
-        //private readonly SalonesDbContext _context;
 
         private readonly ISeccionService _seccioneService;
 
@@ -46,11 +46,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                         Estado = c.Estado,
                     }).ToList();
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Secciones obtenidas correctamente.", Datos = lista, Resultado = true });
+                return ResponseHelper.Success(lista, "Registro obtenido correctamente.");// { mensaje = "Secciones obtenidas correctamente.", datos = lista, resultado = true });
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener las secciones.", Error = ex.Message });
+                return ResponseHelper.Error(ex);//, new { mensaje = "Ocurrió un error al obtener las secciones.", error = ex.Message });
             }
         }
 
@@ -64,7 +64,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (seccion == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "La sección no fue encontrada.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El registro no fue encontrado.");//{ mensaje = "La sección no fue encontrada.", resultado = false });
                 }
 
                 var seccionDTO = new SeccionDTO
@@ -79,11 +79,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                     Estado = seccion.Estado
                 };
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Sección obtenida correctamente.", Datos = seccionDTO, Resultado = true });
+                return ResponseHelper.Success(seccionDTO, "Registro obtenido correctamente.");// { mensaje = "Sección obtenida correctamente.", datos = seccionDTO, resultado = true });
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener la sección.", Error = ex.Message });
+                return ResponseHelper.Error(ex);//, new { mensaje = "Ocurrió un error al obtener la sección.", error = ex.Message });
             }
         }
 
@@ -97,7 +97,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (seccionExistente == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "La sección no existe.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El registro no fue encontrado.");//{ mensaje = "La sección no existe.", resultado = false });
                 }
 
                 seccionExistente.Nombre = modelo.Nombre ?? seccionExistente.Nombre;
@@ -110,14 +110,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo actualizar la sección.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("Ocurrió un error al generar la accion.");// { mensaje = "No se pudo actualizar la sección.", resultado = false });
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Sección actualizada correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("Registro obtenido correctamente.");// { mensaje = "Sección actualizada correctamente.", resultado = respuesta });
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al actualizar la sección.", Error = ex.Message });
+                return ResponseHelper.Error(ex);//, new { mensaje = "Ocurrió un error al actualizar la sección.", error = ex.Message });
             }
         }
 
@@ -140,14 +140,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo registrar la sección.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("Ocurrió un error al generar la accion.");// { mensaje = "No se pudo registrar la sección.", resultado = false });
                 }
 
-                return StatusCode(StatusCodes.Status201Created, new { Mensaje = "Sección creada correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("Registro obtenido correctamente.");// { mensaje = "Sección creada correctamente.", resultado = respuesta });
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al registrar la sección.", Error = ex.Message });
+                return ResponseHelper.Error(ex);//, new { mensaje = "Ocurrió un error al registrar la sección.", error = ex.Message });
             }
         }
 
@@ -161,21 +161,21 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (seccion == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "La sección no fue encontrada.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El registro no fue encontrado.");//{ mensaje = "La sección no fue encontrada.", resultado = false });
                 }
 
                 bool respuesta = await _seccioneService.Eliminar(id);
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo eliminar la sección.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("Ocurrió un error al generar la accion.");// { mensaje = "No se pudo eliminar la sección.", resultado = false });
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Sección eliminada correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("Registro obtenido correctamente.");// { mensaje = "Sección eliminada correctamente.", resultado = respuesta });
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al eliminar la sección.", Error = ex.Message });
+                return ResponseHelper.Error(ex);//, new { mensaje = "Ocurrió un error al eliminar la sección.", error = ex.Message });
             }
         }
     }

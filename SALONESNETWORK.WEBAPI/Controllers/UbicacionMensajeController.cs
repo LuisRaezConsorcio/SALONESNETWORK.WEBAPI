@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SALONESNETWORK.BLL.DTOs;
+using SALONESNETWORK.MODELS.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
+using SALONESNETWORK.BLL.Helpers;
 
 namespace SALONESNETWORK.WEBAPI.Controllers
 {
@@ -43,11 +44,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                         Estado = c.Estado
                     }).ToList();
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Consulta exitosa.", Datos = lista, Resultado = true });
+                return ResponseHelper.Success(lista, "Registro obtenido correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al obtener los datos.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -61,7 +62,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (UbicacionMensaje == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El país no fue encontrado.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El registro no fue encontrado.");
                 }
 
                 var UbicacionMensajeDTO = new UbicacionMensajeDTO
@@ -75,11 +76,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                     Estado = UbicacionMensaje.Estado
                 };
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Consulta exitosa.", Datos = UbicacionMensajeDTO, Resultado = true });
+                return ResponseHelper.Success(UbicacionMensajeDTO, "Registro obtenido correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al obtener los datos.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -93,7 +94,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (UbicacionMensajeExistente == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "No se encontró el registro.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El registro no fue encontrado.");
                 }
 
                 UbicacionMensajeExistente.Id_Mensaje = modelo.Id_Mensaje ?? UbicacionMensajeExistente.Id_Mensaje;
@@ -107,14 +108,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo actualizar la ubicacion.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo actualizar la ubicacion.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Actualización exitosa.", Resultado = respuesta});
+                return ResponseHelper.Success("Registro actualizado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al actualizar los datos.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -138,14 +139,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo insertar la ubicacion.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo insertar la ubicacion.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Inserción exitosa.", Resultado = respuesta});
+                return ResponseHelper.Success("Registro insertado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al insertar los datos.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -158,21 +159,21 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                 var UbicacionMensaje = await _ubicacionMensajeService.ObtenerPorId(id);
                 if (UbicacionMensaje == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El país no fue encontrado.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El registro no fue encontrado.");
                 }
 
                 bool respuesta = await _ubicacionMensajeService.Eliminar(id);
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo eliminar la ubicacion.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo eliminar la ubicacion.");
                 }
 
-                return StatusCode(StatusCodes.Status204NoContent, new { Mensaje = "Eliminación exitosa.", Resultado = respuesta});
+                return ResponseHelper.Success("Registro eliminado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al eliminar los datos.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
     }

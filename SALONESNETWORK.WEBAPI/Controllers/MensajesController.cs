@@ -5,11 +5,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SALONESNETWORK.BLL.DTOs;
+using SALONESNETWORK.MODELS.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using SALONESNETWORK.BLL.Helpers;
 
 namespace SALONESNETWORK.WEBAPI.Controllers
 {
@@ -17,7 +18,6 @@ namespace SALONESNETWORK.WEBAPI.Controllers
     [ApiController]
     public class MensajesController : ControllerBase
     {
-        //private readonly SalonesDbContext _context;
 
         private readonly IMensajeService _mensajeService;
 
@@ -54,11 +54,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                     })
                     .ToList();
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Mensajes obtenidos exitosamente.", Datos = lista, Resultado = true });
+                return ResponseHelper.Success(lista, "Mensajes obtenidos exitosamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al obtener los mensajes.", Error= ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -72,7 +72,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (mensaje == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El mensaje no fue encontrado.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El mensaje no fue encontrado.");
                 }
 
                 var mensajeDTO = new MensajeDTO
@@ -93,11 +93,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                     Estado = mensaje.Estado
                 };
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Mensaje obtenido exitosamente.", Datos = mensajeDTO, Resultado = true });
+                return ResponseHelper.Success(mensajeDTO, "Mensaje obtenido exitosamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al obtener el mensaje por ID.", Error= ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -111,7 +111,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (mensajeExistente == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El mensaje no existe.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El mensaje no fue encontrado.");
                 }
 
                 mensajeExistente.Id_TipoMensaje = modelo.Id_TipoMensaje ?? mensajeExistente.Id_TipoMensaje;
@@ -130,14 +130,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo actualizar el mensaje.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo actualizar el mensaje.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "El mensaje fue actualizado exitosamente.", Resultado = respuesta });
+                return ResponseHelper.Success("El mensaje fue actualizado exitosamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al actualizar el mensaje.", Error= ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -166,14 +166,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo insertar el mensaje.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo insertar el mensaje.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "El mensaje fue creado exitosamente.", Resultado = respuesta });
+                return ResponseHelper.Success("El mensaje fue creado exitosamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al crear el mensaje.", Error= ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -187,21 +187,21 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (mensaje == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El mensaje no existe.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El mensaje no fue encontrado.");
                 }
 
                 bool respuesta = await _mensajeService.Eliminar(id);
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo eliminar el mensaje.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo eliminar el mensaje.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "El mensaje fue eliminado exitosamente.", Resultado = respuesta });
+                return ResponseHelper.Success("El mensaje fue eliminado exitosamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al eliminar el mensaje.", Error= ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
     }

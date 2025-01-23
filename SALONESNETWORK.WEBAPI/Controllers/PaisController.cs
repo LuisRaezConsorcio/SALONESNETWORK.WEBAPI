@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SALONESNETWORK.BLL.DTOs;
+using SALONESNETWORK.MODELS.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
+using SALONESNETWORK.BLL.Helpers;
 
 namespace SALONESNETWORK.WEBAPI.Controllers
 {
@@ -18,7 +19,6 @@ namespace SALONESNETWORK.WEBAPI.Controllers
     [ApiController]
     public class PaisController : ControllerBase
     {
-        //private readonly SalonesDbContext _context;
 
         private readonly IPaisService _paisService;
 
@@ -47,11 +47,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                         Estado = c.Estado,
                     }).ToList();
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Países obtenidos exitosamente.", Datos = lista, Resultado = true });
+                return ResponseHelper.Success(lista, "Países obtenido correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al obtener los países.", Error= ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -65,7 +65,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (pais == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El país no fue encontrado.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El país no fue encontrado.");
                 }
 
                 var paisDTO = new PaisDTO
@@ -79,11 +79,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                     Estado = pais.Estado
                 };
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "País obtenido exitosamente.", Datos = paisDTO, Resultado = true });
+                return ResponseHelper.Success(paisDTO, "País obtenido correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al obtener el país por ID.", Error= ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -97,7 +97,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (paisExistente == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El país no existe.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El país no fue encontrado.");
                 }
 
                 paisExistente.Nombre = modelo.Nombre ?? paisExistente.Nombre;
@@ -109,14 +109,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo actualizar el pais.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo actualizar el pais.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "El país fue actualizado exitosamente.", Resultado = respuesta });
+                return ResponseHelper.Success("El país fue actualizado exitosamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al actualizar el país.", Error= ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -138,14 +138,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo insertar el pais.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo insertar el pais.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "El país fue creado exitosamente.", Resultado = respuesta });
+                return ResponseHelper.Success("El país fue creado exitosamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al crear el país.", Error= ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -159,21 +159,21 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (pais == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El país no existe.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El país no fue encontrado.");
                 }
 
                 bool respuesta = await _paisService.Eliminar(id);
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo eliminar el pais.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo eliminar el pais.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "El país fue eliminado exitosamente.", Resultado = respuesta });
+                return ResponseHelper.Success("El país fue eliminado exitosamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Error al eliminar el país.", Error= ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
     }

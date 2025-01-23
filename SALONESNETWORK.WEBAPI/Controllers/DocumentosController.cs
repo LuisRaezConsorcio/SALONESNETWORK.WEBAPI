@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SALONESNETWORK.BLL.DTOs;
+using SALONESNETWORK.MODELS.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
+using SALONESNETWORK.BLL.Helpers;
 
 namespace SALONESNETWORK.WEBAPI.Controllers
 {
@@ -16,7 +17,6 @@ namespace SALONESNETWORK.WEBAPI.Controllers
     [ApiController]
     public class DocumentosController : ControllerBase
     {
-        //private readonly SalonesDbContext _context;
 
         private readonly IDocumentoService _documentosService;
 
@@ -41,11 +41,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                         Ubicacion = c.Ubicacion
                     }).ToList();
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Lista de documentos obtenida correctamente.", Datos = lista, Resultado = true });
+                return ResponseHelper.Success(lista, "Lista de documentos obtenida correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener los documentos.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -59,7 +59,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (documento == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El documento no fue encontrado.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El documento no fue encontrado.");
                 }
 
                 var documentoDTO = new DocumentoDTO
@@ -69,11 +69,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                     Ubicacion = documento.Ubicacion
                 };
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Documento obtenido correctamente.", Datos = documentoDTO, Resultado = true });
+                return ResponseHelper.Success(documentoDTO, "Documento obtenido correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener el documento por ID.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -87,7 +87,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (documentoExistente == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El documento no existe.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El documento no fue encontrado.");
                 }
 
                 documentoExistente.Descripcion = modelo.Descripcion;
@@ -97,14 +97,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo actualizar el documento.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo actualizar el documento.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Documento actualizado correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("Documento actualizado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al actualizar el documento.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -124,14 +124,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo insertar el documento", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo insertar el documento.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Documento creado correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("Documento creado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al crear el documento.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -145,21 +145,21 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (documento == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El documento no fue encontrado.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El documento no fue encontrado.");
                 }
 
                 bool respuesta = await _documentosService.Eliminar(id);
 
                 if (!respuesta)
                 {
-                   return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo eliminar el documento.", Resultado = false });
+                   return ResponseHelper.BadRequestResponse("No se pudo eliminar el documento.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Documento eliminado correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("Documento eliminado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al eliminar el documento.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
     }

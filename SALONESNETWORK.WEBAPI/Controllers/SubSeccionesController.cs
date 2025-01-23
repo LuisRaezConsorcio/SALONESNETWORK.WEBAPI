@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SALONESNETWORK.BLL.DTOs;
+using SALONESNETWORK.MODELS.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
+using SALONESNETWORK.BLL.Helpers;
 
 namespace SALONESNETWORK.WEBAPI.Controllers
 {
@@ -46,11 +47,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                         Estado = c.Estado,
                     }).ToList();
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "SubSecciones obtenidas correctamente.", Datos = lista, Resultado = true });
+                return ResponseHelper.Success(lista, "SubSecciones obtenidas correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener las subsecciones.", Error= ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -64,7 +65,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (SubSeccione == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "La subsección no fue encontrada.", Resultado = false});
+                    return ResponseHelper.NotFoundResponse("La subsección no fue encontrado.");
                 }
 
                 var SubSeccioneDTO = new SubSeccionDTO
@@ -79,11 +80,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                     Estado = SubSeccione.Estado
                 };
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "SubSecciones obtenidas correctamente.", Datos = SubSeccioneDTO, Resultado = true });
+                return ResponseHelper.Success(SubSeccioneDTO, "SubSeccion obtenida correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener la subsección.", Error= ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -97,7 +98,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (SubSeccioneExistente == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "La subsección no existe.", Resultado = false});
+                    return ResponseHelper.NotFoundResponse("La subsección no fue encontrada.");
                 }
 
                 SubSeccioneExistente.Nombre = modelo.Nombre ?? SubSeccioneExistente.Nombre;
@@ -110,14 +111,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo actualizar la subsección.", Resultado = false});
+                    return ResponseHelper.BadRequestResponse("No se pudo actualizar la subsección.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Subsección actualizada con éxito.", Resultado = respuesta});
+                return ResponseHelper.Success("Subsección actualizada con éxito.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al actualizar la subsección.", Error= ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -140,14 +141,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo registrar la subsección.", Resultado = false});
+                    return ResponseHelper.BadRequestResponse("No se pudo registrar la subsección.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Subsección creada con éxito.", Resultado = respuesta});
+                return ResponseHelper.Success("Subsección creada correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al registrar la subsección.", Error= ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -161,21 +162,21 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (SubSeccione == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "La subsección no fue encontrada.", Resultado = false});
+                    return ResponseHelper.NotFoundResponse("La subsección no fue encontrado.");
                 }
 
                 bool respuesta = await _subSeccioneService.Eliminar(id);
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo eliminar la subsección.", Resultado = false});
+                    return ResponseHelper.BadRequestResponse("No se pudo eliminar la subsección.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Subsección eliminada con éxito.", Resultado = respuesta});
+                return ResponseHelper.Success("Subsección eliminada correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al eliminar la subsección.", Error= ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
     }

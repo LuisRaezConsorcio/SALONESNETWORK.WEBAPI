@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SALONESNETWORK.BLL.DTOs;
+using SALONESNETWORK.MODELS.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
+using SALONESNETWORK.BLL.Helpers;
 
 namespace SALONESNETWORK.WEBAPI.Controllers
 {
@@ -42,11 +43,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                         Estado = c.Estado
                     }).ToList();
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje =  "Datos obtenidos correctamente.", Datos = lista, Resultado = true });
+                return ResponseHelper.Success(lista, "Registro obtenido correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener los datos.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -60,7 +61,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (asuntoPaisSeccionSub == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El registro no fue encontrado.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El registro no fue encontrado.");
                 }
 
                 var asuntoPaisSeccionSubDTO = new AsuntoPaisSeccionSubDTO
@@ -73,11 +74,11 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                     Estado = asuntoPaisSeccionSub.Estado
                 };
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Registro obtenido correctamente.", Datos = asuntoPaisSeccionSubDTO, Resultado = true });
+                return ResponseHelper.Success(asuntoPaisSeccionSubDTO, "Registro obtenido correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al obtener el registro.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -91,7 +92,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (asuntoPaisSeccionSubExistente == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El registro no existe.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El registro no fue encontrado.");
                 }
 
                 asuntoPaisSeccionSubExistente.Id_Asunto = modelo.Id_Asunto ?? asuntoPaisSeccionSubExistente.Id_Asunto;
@@ -104,14 +105,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo actualizar el registro.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo actualizar el registro.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Registro actualizado correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("Registro actualizado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al actualizar el registro.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -127,21 +128,21 @@ namespace SALONESNETWORK.WEBAPI.Controllers
                     Id_Pais = modelo.Id_Pais,
                     Id_Seccion = modelo.Id_Seccion,
                     Id_SubSeccion = modelo.Id_SubSeccion,
-                    Estado = modelo.Estado
+                    Estado = true
                 };
 
                 bool respuesta = await _asuntoPaisSeccionSubService.Insertar(nuevoModelo);
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo ingresar el registro.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo ingresar el registro.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Registro creado correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("Registro creado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al crear el registro.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
 
@@ -155,7 +156,7 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (asuntoPaisSeccionSub == null)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { Mensaje = "El registro no existe.", Resultado = false });
+                    return ResponseHelper.NotFoundResponse("El registro no fue encontrado.");
                 }
 
                 bool respuesta = await _asuntoPaisSeccionSubService.Eliminar(id);
@@ -163,14 +164,14 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
                 if (!respuesta)
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { Mensaje = "No se pudo actualizar el registro.", Resultado = false });
+                    return ResponseHelper.BadRequestResponse("No se pudo eliminar el registro.");
                 }
 
-                return StatusCode(StatusCodes.Status200OK, new { Mensaje = "Registro eliminado correctamente.", Resultado = respuesta });
+                return ResponseHelper.Success("Registro eliminado correctamente.");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Mensaje = "Ocurrió un error al eliminar el registro.", Error = ex.Message });
+                return ResponseHelper.Error(ex);
             }
         }
     }
