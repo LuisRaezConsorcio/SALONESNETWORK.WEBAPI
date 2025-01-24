@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.Elfie.Serialization;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Common;
-using SALONESNETWORK.MODELS.DTOs;
+using SALONESNETWORK.WEBAPI.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;

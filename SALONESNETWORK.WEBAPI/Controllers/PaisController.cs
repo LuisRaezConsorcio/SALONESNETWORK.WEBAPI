@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SALONESNETWORK.MODELS.DTOs;
+using SALONESNETWORK.WEBAPI.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;

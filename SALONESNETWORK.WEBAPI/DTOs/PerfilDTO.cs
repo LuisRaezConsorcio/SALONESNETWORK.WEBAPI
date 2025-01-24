@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SALONESNETWORK.MODELS.DTOs
+namespace SALONESNETWORK.WEBAPI.DTOs
 {
     public class PerfilDTO
     {

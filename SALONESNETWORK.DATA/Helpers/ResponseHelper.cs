@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SALONESNETWORK.MODELS.DTOs;
+using SALONESNETWORK.BLL.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;

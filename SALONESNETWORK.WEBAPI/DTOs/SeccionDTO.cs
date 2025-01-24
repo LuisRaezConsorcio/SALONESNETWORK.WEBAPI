@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SALONESNETWORK.MODELS.DTOs
+namespace SALONESNETWORK.WEBAPI.DTOs
 {
-    public class AsuntoDTO
+    public class SeccionDTO
     {
         public int Id { get; set; }
         public string? Nombre { get; set; }
