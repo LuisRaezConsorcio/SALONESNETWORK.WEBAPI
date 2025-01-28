@@ -20,7 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SALONESNETWORK.DAL\SALONESNETWORK.DAL.csproj" />
-	  <ProjectReference Include="..\SALONESNETWORK.MODELO\SALONESNETWORK.MODELS.csproj" />
+    <ProjectReference Include="..\SALONESNETWORK.MODELO\SALONESNETWORK.MODELS.csproj" />
   </ItemGroup>
 
 </Project>

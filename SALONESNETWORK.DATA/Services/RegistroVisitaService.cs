@@ -27,9 +27,9 @@ namespace SALONESNETWORK.BLL.Services
             return await _RegistroVisitaRepository.Insertar(modelo);
         }
 
-        public async Task<RegistroVisita> ObtenerPorIdUsuario(RegistroVisita modelo)
+        public async Task<RegistroVisita> ObtenerPorIdUsuario(int? Id_Usuario)
         {
-            return await _RegistroVisitaRepository.ObtenerPorIdUsuario(modelo);
+            return await _RegistroVisitaRepository.ObtenerPorIdUsuario(Id_Usuario);
         }
 
     }

@@ -1,4 +1,5 @@
-﻿using SALONESNETWORK.DAL.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.DAL.Interfaces;
 using SALONESNETWORK.MODELS.Entities;
 using System;
@@ -20,7 +21,7 @@ namespace SALONESNETWORK.DAL.Repositories
 
         public async Task<bool> Eliminar(int id)
         {
-            RegistroVisita modelo = _dbContext.RegistroVisitas.First(c => c.Id == id);
+            RegistroVisita modelo = await _dbContext.RegistroVisitas.FirstOrDefaultAsync(c => c.Id == id);
             _dbContext.RegistroVisitas.Update(modelo);
             await _dbContext.SaveChangesAsync();
             return true;
@@ -33,9 +34,9 @@ namespace SALONESNETWORK.DAL.Repositories
             return true;
         }
 
-        public async Task<RegistroVisita> ObtenerPorIdUsuario(RegistroVisita modelo)
+        public async Task<RegistroVisita> ObtenerPorIdUsuario(int? Id_Usuario)
         {
-            return _dbContext.RegistroVisitas.First(c => c.Id_Usuario == modelo.Id_Usuario);
+            return await _dbContext.RegistroVisitas.Where(c => c.Id_Usuario == Id_Usuario).FirstOrDefaultAsync();
         }
     }
 }

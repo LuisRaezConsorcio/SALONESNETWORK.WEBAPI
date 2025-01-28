@@ -10,6 +10,6 @@ namespace SALONESNETWORK.DAL.Interfaces
     {
         Task<bool> Insertar(TEntityModel modelo);
         Task<bool> Eliminar(int id);
-        Task<TEntityModel> ObtenerPorIdUsuario(TEntityModel modelo);
+        Task<TEntityModel> ObtenerPorIdUsuario(int? Id_Usuario);
     }
 }

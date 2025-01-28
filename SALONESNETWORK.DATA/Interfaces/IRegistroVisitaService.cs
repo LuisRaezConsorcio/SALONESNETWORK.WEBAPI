@@ -11,6 +11,6 @@ namespace SALONESNETWORK.BLL.Interfaces
     {
         Task<bool> Insertar(RegistroVisita modelo);
         Task<bool> Eliminar(int id);
-        Task<RegistroVisita> ObtenerPorIdUsuario(RegistroVisita idmodelo);
+        Task<RegistroVisita> ObtenerPorIdUsuario(int? Id_Usuario);
     }
 }

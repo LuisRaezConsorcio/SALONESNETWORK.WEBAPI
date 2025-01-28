@@ -27,11 +27,12 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
         // GET: api/RegistroVisita/5
         [HttpGet("GetRegistroVisitaByUserId")]
-        public async Task<IActionResult> GetRegistroVisitaByUserId(RegistroVisita modelo)
+        public async Task<IActionResult> GetRegistroVisitaByUserId(int Id_Usuario)
         {
             try
             {
-                var registroVisita = await _registroVisitaService.ObtenerPorIdUsuario(modelo);
+                
+                RegistroVisita registroVisita = await _registroVisitaService.ObtenerPorIdUsuario(Id_Usuario);
 
                 if (registroVisita == null)
                 {
@@ -89,11 +90,8 @@ namespace SALONESNETWORK.WEBAPI.Controllers
         {
             try
             {
-                RegistroVisita nuevoModelo = new RegistroVisita()
-                {
-                    Id_Usuario = modelo.Id_Usuario,
-                };
-                var registroVisita = await _registroVisitaService.ObtenerPorIdUsuario(nuevoModelo);
+                
+                var registroVisita = await _registroVisitaService.ObtenerPorIdUsuario(modelo.Id_Usuario);
 
                 if (registroVisita == null)
                     return ResponseHelper.NotFoundResponse("El registro de visita no fue encontrado.");
