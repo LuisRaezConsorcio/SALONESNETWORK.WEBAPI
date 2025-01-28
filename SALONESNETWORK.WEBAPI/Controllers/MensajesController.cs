@@ -5,11 +5,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SALONESNETWORK.BLL.DTOs;
+using SALONESNETWORK.WEBAPI.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using SALONESNETWORK.BLL.Helpers;
 
 namespace SALONESNETWORK.WEBAPI.Controllers
 {
@@ -17,7 +18,6 @@ namespace SALONESNETWORK.WEBAPI.Controllers
     [ApiController]
     public class MensajesController : ControllerBase
     {
-        //private readonly SalonesDbContext _context;
 
         private readonly IMensajeService _mensajeService;
 
@@ -28,142 +28,181 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
         // GET: api/Mensaje
         [HttpGet("GetMensajes")]
-        public async Task<ActionResult<IEnumerable<Mensaje>>> GetMensajes()
+        public async Task<IActionResult> GetMensajes()
         {
-            //return await _context.Mensajees.ToListAsync();
-            IQueryable<Mensaje> queryContactoSQL = await _mensajeService.ObtenerTodos();
+            try
+            {
+                var queryContactoSQL = await _mensajeService.ObtenerTodos();
 
-            List<MensajeDTO> lista = queryContactoSQL
-                                                     .Select(c => new MensajeDTO()
-                                                     {
-                                                         Id = c.Id,
-                                                         Id_TipoMensaje = c.Id_TipoMensaje,
-                                                         Id_Usuario = c.Id_Usuario,
-                                                         Nombre = c.Nombre,
-                                                         Descripcion = c.Descripcion,
-                                                         FechaCreacion = c.FechaCreacion,
-                                                         UsuarioCreacion = c.UsuarioCreacion,
-                                                         FechaModificacion = c.FechaModificacion,
-                                                         UsuarioModificacion = c.UsuarioModificacion,
-                                                         Seguimiento = c.Seguimiento,
-                                                         Id_MensajeSeguimiento = c.Id_MensajeSeguimiento,
-                                                         Respuesta = c.Respuesta,
-                                                         Id_MensajeRespuesta = c.Id_MensajeRespuesta
-                                                     }).ToList();
+                var lista = queryContactoSQL
+                    .Select(c => new MensajeDTO
+                    {
+                        Id = c.Id,
+                        Id_TipoMensaje = c.Id_TipoMensaje,
+                        Id_Usuario = c.Id_Usuario,
+                        Nombre = c.Nombre,
+                        Descripcion = c.Descripcion,
+                        FechaCreacion = c.FechaCreacion,
+                        UsuarioCreacion = c.UsuarioCreacion,
+                        FechaModificacion = c.FechaModificacion,
+                        UsuarioModificacion = c.UsuarioModificacion,
+                        Seguimiento = c.Seguimiento,
+                        Id_MensajeSeguimiento = c.Id_MensajeSeguimiento,
+                        Respuesta = c.Respuesta,
+                        Id_MensajeRespuesta = c.Id_MensajeRespuesta,
+                        Estado = c.Estado
+                    })
+                    .ToList();
 
-            return StatusCode(StatusCodes.Status200OK, lista);
+                return ResponseHelper.Success(lista, "Mensajes obtenidos exitosamente.");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // GET: api/Mensaje/5
         [HttpGet("GetMensajeById")]
-        public async Task<ActionResult<Mensaje>> GetMensajeById(int id)
+        public async Task<IActionResult> GetMensajeById(int id)
         {
-            // Llama al servicio para obtener el registro por ID
-            var Mensaje = await _mensajeService.ObtenerPorId(id);
-
-            // Verifica si el resultado es nulo
-            if (Mensaje == null)
+            try
             {
-                return NotFound(new { mensaje = "El país no fue encontrado." });
+                var mensaje = await _mensajeService.ObtenerPorId(id);
+
+                if (mensaje == null)
+                {
+                    return ResponseHelper.NotFoundResponse("El mensaje no fue encontrado.");
+                }
+
+                var mensajeDTO = new MensajeDTO
+                {
+                    Id = mensaje.Id,
+                    Id_TipoMensaje = mensaje.Id_TipoMensaje,
+                    Id_Usuario = mensaje.Id_Usuario,
+                    Nombre = mensaje.Nombre,
+                    Descripcion = mensaje.Descripcion,
+                    FechaCreacion = mensaje.FechaCreacion,
+                    UsuarioCreacion = mensaje.UsuarioCreacion,
+                    FechaModificacion = mensaje.FechaModificacion,
+                    UsuarioModificacion = mensaje.UsuarioModificacion,
+                    Seguimiento = mensaje.Seguimiento,
+                    Id_MensajeSeguimiento = mensaje.Id_MensajeSeguimiento,
+                    Respuesta = mensaje.Respuesta,
+                    Id_MensajeRespuesta = mensaje.Id_MensajeRespuesta,
+                    Estado = mensaje.Estado
+                };
+
+                return ResponseHelper.Success(mensajeDTO, "Mensaje obtenido exitosamente.");
             }
-
-            // Convierte la entidad a DTO
-            var MensajeDTO = new MensajeDTO
+            catch (Exception ex)
             {
-                Id = Mensaje.Id,
-                Id_TipoMensaje = Mensaje.Id_TipoMensaje,
-                Id_Usuario = Mensaje.Id_Usuario,
-                Nombre = Mensaje.Nombre,
-                Descripcion = Mensaje.Descripcion,
-                FechaCreacion = Mensaje.FechaCreacion,
-                UsuarioCreacion = Mensaje.UsuarioCreacion,
-                FechaModificacion = Mensaje.FechaModificacion,
-                UsuarioModificacion = Mensaje.UsuarioModificacion,
-                Seguimiento = Mensaje.Seguimiento,
-                Id_MensajeSeguimiento = Mensaje.Id_MensajeSeguimiento,
-                Respuesta = Mensaje.Respuesta,
-                Id_MensajeRespuesta = Mensaje.Id_MensajeRespuesta
-            };
-
-            // Retorna el DTO con un status 200
-            return Ok(MensajeDTO);
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // PUT: api/Mensaje/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("PutMensaje")]
         public async Task<IActionResult> PutMensaje(MensajeDTO modelo)
         {
-            // Buscar el modelo existente en la base de datos
-            var MensajeExistente = await _mensajeService.ObtenerPorId(modelo.Id);
+            try
+            {
+                var mensajeExistente = await _mensajeService.ObtenerPorId(modelo.Id);
 
-            if (MensajeExistente == null)
-                return NotFound(new { mensaje = "El país no existe." });
+                if (mensajeExistente == null)
+                {
+                    return ResponseHelper.NotFoundResponse("El mensaje no fue encontrado.");
+                }
 
-            // Actualizar solo las propiedades del modelo que tienen datos en el DTO
-            MensajeExistente.Id_TipoMensaje = modelo.Id_TipoMensaje ?? MensajeExistente.Id_TipoMensaje;
-            MensajeExistente.Id_Usuario = modelo.Id_Usuario ?? MensajeExistente.Id_Usuario;
-            MensajeExistente.Nombre = modelo.Nombre ?? MensajeExistente.Nombre;
-            MensajeExistente.Descripcion = modelo.Descripcion ?? MensajeExistente.Descripcion;
-            MensajeExistente.FechaModificacion = DateTime.Now;
-            MensajeExistente.UsuarioModificacion = modelo.UsuarioModificacion ?? MensajeExistente.UsuarioModificacion;
-            MensajeExistente.Seguimiento = modelo.Seguimiento ?? MensajeExistente.Seguimiento;
-            MensajeExistente.Id_MensajeSeguimiento = modelo.Id_MensajeSeguimiento ?? MensajeExistente.Id_MensajeSeguimiento;
-            MensajeExistente.Respuesta = modelo.Respuesta ?? MensajeExistente.Respuesta;
-            MensajeExistente.Id_MensajeRespuesta = modelo.Id_MensajeRespuesta ?? MensajeExistente.Id_MensajeRespuesta;
+                mensajeExistente.Id_TipoMensaje = modelo.Id_TipoMensaje ?? mensajeExistente.Id_TipoMensaje;
+                mensajeExistente.Id_Usuario = modelo.Id_Usuario ?? mensajeExistente.Id_Usuario;
+                mensajeExistente.Nombre = modelo.Nombre ?? mensajeExistente.Nombre;
+                mensajeExistente.Descripcion = modelo.Descripcion ?? mensajeExistente.Descripcion;
+                mensajeExistente.FechaModificacion = DateTime.Now;
+                mensajeExistente.UsuarioModificacion = modelo.UsuarioModificacion ?? mensajeExistente.UsuarioModificacion;
+                mensajeExistente.Seguimiento = modelo.Seguimiento ?? mensajeExistente.Seguimiento;
+                mensajeExistente.Id_MensajeSeguimiento = modelo.Id_MensajeSeguimiento ?? mensajeExistente.Id_MensajeSeguimiento;
+                mensajeExistente.Respuesta = modelo.Respuesta ?? mensajeExistente.Respuesta;
+                mensajeExistente.Id_MensajeRespuesta = modelo.Id_MensajeRespuesta ?? mensajeExistente.Id_MensajeRespuesta;
+                mensajeExistente.Estado = modelo.Estado ?? mensajeExistente.Estado;
 
-            // Realizar la actualización
-            bool respuesta = await _mensajeService.Actualizar(MensajeExistente);
+                var respuesta = await _mensajeService.Actualizar(mensajeExistente);
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+                if (!respuesta)
+                {
+                    return ResponseHelper.BadRequestResponse("No se pudo actualizar el mensaje.");
+                }
+
+                return ResponseHelper.Success("El mensaje fue actualizado exitosamente.");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // POST: api/Mensaje
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("PostMensaje")]
         public async Task<IActionResult> PostMensaje(MensajeDTO modelo)
         {
-
-            Mensaje NuevoModelo = new Mensaje()
+            try
             {
-                
-                Id_TipoMensaje = modelo.Id_TipoMensaje,
-                Id_Usuario = modelo.Id_Usuario,
-                Nombre = modelo.Nombre,
-                Descripcion = modelo.Descripcion,
-                FechaCreacion = DateTime.Now,
-                UsuarioCreacion = 1,
-                Seguimiento = modelo.Seguimiento,
-                Id_MensajeSeguimiento = modelo.Id_MensajeSeguimiento,
-                Respuesta = modelo.Respuesta,
-                Id_MensajeRespuesta = modelo.Id_MensajeRespuesta
-            };
+                var nuevoModelo = new Mensaje
+                {
+                    Id_TipoMensaje = modelo.Id_TipoMensaje,
+                    Id_Usuario = modelo.Id_Usuario,
+                    Nombre = modelo.Nombre,
+                    Descripcion = modelo.Descripcion,
+                    FechaCreacion = DateTime.Now,
+                    UsuarioCreacion = modelo.UsuarioCreacion ?? 1,
+                    Seguimiento = modelo.Seguimiento,
+                    Id_MensajeSeguimiento = modelo.Id_MensajeSeguimiento,
+                    Respuesta = modelo.Respuesta,
+                    Id_MensajeRespuesta = modelo.Id_MensajeRespuesta,
+                    Estado = true
+                };
 
-            bool respuesta = await _mensajeService.Insertar(NuevoModelo);
+                var respuesta = await _mensajeService.Insertar(nuevoModelo);
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+                if (!respuesta)
+                {
+                    return ResponseHelper.BadRequestResponse("No se pudo insertar el mensaje.");
+                }
 
+                return ResponseHelper.Success("El mensaje fue creado exitosamente.");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // DELETE: api/Mensaje/5
         [HttpDelete("DeleteMensaje")]
         public async Task<IActionResult> DeleteMensaje(int id)
         {
-            var Mensaje = await _mensajeService.ObtenerPorId(id);
-            if (Mensaje == null)
+            try
             {
-                return NotFound();
+                var mensaje = await _mensajeService.ObtenerPorId(id);
+
+                if (mensaje == null)
+                {
+                    return ResponseHelper.NotFoundResponse("El mensaje no fue encontrado.");
+                }
+
+                bool respuesta = await _mensajeService.Eliminar(id);
+
+                if (!respuesta)
+                {
+                    return ResponseHelper.BadRequestResponse("No se pudo eliminar el mensaje.");
+                }
+
+                return ResponseHelper.Success("El mensaje fue eliminado exitosamente.");
             }
-
-            await _mensajeService.Eliminar(id);
-            //await _mensajeService.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
-
-        //private bool MensajeExists(int id)
-        //{
-        //    return _context.Mensajees.Any(e => e.Id == id);
-        //}
     }
 }

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SALONESNETWORK.BLL.DTOs
+namespace SALONESNETWORK.WEBAPI.DTOs
 {
     public class UbicacionMensajeDTO
     {
@@ -15,5 +15,6 @@ namespace SALONESNETWORK.BLL.DTOs
         public int? Id_Pais { get; set; } // FK a Pais
         public int? Id_Seccion { get; set; } // FK a Seccion
         public int? Id_SubSeccion { get; set; } // FK a SubSeccion
+        public Boolean? Estado { get; set; }
     }
 }

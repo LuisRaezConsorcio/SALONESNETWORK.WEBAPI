@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SALONESNETWORK.BLL.DTOs;
+using SALONESNETWORK.WEBAPI.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
+using SALONESNETWORK.BLL.Helpers;
 
 namespace SALONESNETWORK.WEBAPI.Controllers
 {
@@ -16,7 +17,6 @@ namespace SALONESNETWORK.WEBAPI.Controllers
     [ApiController]
     public class PerfilSeccionesController : ControllerBase
     {
-        //private readonly SalonesDbContext _context;
 
         private readonly IPerfilSeccionService _perfilSeccionService;
 
@@ -27,105 +27,143 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
         // GET: api/PerfilSeccion
         [HttpGet("GetPerfilSecciones")]
-        public async Task<ActionResult<IEnumerable<PerfilSeccion>>> GetPerfilSecciones()
+        public async Task<IActionResult> GetPerfilSecciones()
         {
-            //return await _context.PerfilSecciones.ToListAsync();
-            IQueryable<PerfilSeccion> queryContactoSQL = await _perfilSeccionService.ObtenerTodos();
+            try
+            {
+                IQueryable<PerfilSeccion> queryContactoSQL = await _perfilSeccionService.ObtenerTodos();
+                List<PerfilSeccionDTO> lista = queryContactoSQL
+                    .Select(c => new PerfilSeccionDTO()
+                    {
+                        Id = c.Id,
+                        Id_Seccion = c.Id_Seccion,
+                        Id_Perfil = c.Id_Perfil,
+                        Estado = c.Estado
+                    }).ToList();
 
-            List<PerfilSeccionDTO> lista = queryContactoSQL
-                                                     .Select(c => new PerfilSeccionDTO()
-                                                     {
-                                                         Id = c.Id,
-                                                         Id_Seccion = c.Id_Seccion,
-                                                         Id_Perfil = c.Id_Perfil
-                                                     }).ToList();
-
-            return StatusCode(StatusCodes.Status200OK, lista);
+                return ResponseHelper.Success(lista, "PerfilSecciones obtenidos correctamente.");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // GET: api/PerfilSeccion/5
         [HttpGet("GetPerfilSeccionById")]
-        public async Task<ActionResult<PerfilSeccion>> GetPerfilSeccionById(int id)
+        public async Task<IActionResult> GetPerfilSeccionById(int id)
         {
-            // Llama al servicio para obtener el registro por ID
-            var PerfilSeccion = await _perfilSeccionService.ObtenerPorId(id);
-
-            // Verifica si el resultado es nulo
-            if (PerfilSeccion == null)
+            try
             {
-                return NotFound(new { mensaje = "El país no fue encontrado." });
+                var perfilSeccion = await _perfilSeccionService.ObtenerPorId(id);
+
+                if (perfilSeccion == null)
+                {
+                    return ResponseHelper.NotFoundResponse("El PerfilSeccion no fue encontrado.");
+                }
+
+                var perfilSeccionDTO = new PerfilSeccionDTO
+                {
+                    Id = perfilSeccion.Id,
+                    Id_Seccion = perfilSeccion.Id_Seccion,
+                    Id_Perfil = perfilSeccion.Id_Perfil,
+                    Estado = perfilSeccion.Estado
+                };
+
+                return ResponseHelper.Success(perfilSeccionDTO, "PerfilSeccion obtenido correctamente.");
             }
-
-            // Convierte la entidad a DTO
-            var PerfilSeccionDTO = new PerfilSeccionDTO
+            catch (Exception ex)
             {
-                Id = PerfilSeccion.Id,
-                Id_Seccion = PerfilSeccion.Id_Seccion,
-                Id_Perfil = PerfilSeccion.Id_Perfil
-            };
-
-            // Retorna el DTO con un status 200
-            return Ok(PerfilSeccionDTO);
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // PUT: api/PerfilSeccion/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("PutPerfilSeccion")]
         public async Task<IActionResult> PutPerfilSeccion(PerfilSeccionDTO modelo)
         {
-            // Buscar el modelo existente en la base de datos
-            var PerfilSeccionExistente = await _perfilSeccionService.ObtenerPorId(modelo.Id);
+            try
+            {
+                var perfilSeccionExistente = await _perfilSeccionService.ObtenerPorId(modelo.Id);
 
-            if (PerfilSeccionExistente == null)
-                return NotFound(new { mensaje = "El país no existe." });
+                if (perfilSeccionExistente == null)
+                {
+                    return ResponseHelper.NotFoundResponse("El PerfilSeccion no fue encontrado.");
+                }
 
-            // Actualizar solo las propiedades del modelo que tienen datos en el DTO
-            PerfilSeccionExistente.Id_Seccion = modelo.Id_Seccion ?? PerfilSeccionExistente.Id_Seccion;
-            PerfilSeccionExistente.Id_Perfil = modelo.Id_Perfil ?? PerfilSeccionExistente.Id_Perfil;
+                perfilSeccionExistente.Id_Seccion = modelo.Id_Seccion ?? perfilSeccionExistente.Id_Seccion;
+                perfilSeccionExistente.Id_Perfil = modelo.Id_Perfil ?? perfilSeccionExistente.Id_Perfil;
+                perfilSeccionExistente.Estado = modelo.Estado ?? perfilSeccionExistente.Estado;
 
-            // Realizar la actualización
-            bool respuesta = await _perfilSeccionService.Actualizar(PerfilSeccionExistente);
+                bool respuesta = await _perfilSeccionService.Actualizar(perfilSeccionExistente);
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+                if (!respuesta)
+                {
+                    return ResponseHelper.BadRequestResponse("No se pudo actualizar el registro.");
+                }
+
+                return ResponseHelper.Success("PerfilSeccion actualizado correctamente.");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // POST: api/PerfilSeccion
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("PostPerfilSeccion")]
         public async Task<IActionResult> PostPerfilSeccion(PerfilSeccionDTO modelo)
         {
-
-            PerfilSeccion NuevoModelo = new PerfilSeccion()
+            try
             {
-                Id_Seccion = modelo.Id_Seccion,
-                Id_Perfil = modelo.Id_Perfil
-            };
+                PerfilSeccion nuevoModelo = new PerfilSeccion()
+                {
+                    Id_Seccion = modelo.Id_Seccion,
+                    Id_Perfil = modelo.Id_Perfil,
+                    Estado = true
+                };
 
-            bool respuesta = await _perfilSeccionService.Insertar(NuevoModelo);
+                bool respuesta = await _perfilSeccionService.Insertar(nuevoModelo);
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+                if (!respuesta)
+                {
+                    return ResponseHelper.BadRequestResponse("No se pudo insertar el registro.");
+                }
 
+                return ResponseHelper.Success("PerfilSeccion creada correctamente.");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // DELETE: api/PerfilSeccion/5
         [HttpDelete("DeletePerfilSeccion")]
         public async Task<IActionResult> DeletePerfilSeccion(int id)
         {
-            var PerfilSeccion = await _perfilSeccionService.ObtenerPorId(id);
-            if (PerfilSeccion == null)
+            try
             {
-                return NotFound();
+                var perfilSeccion = await _perfilSeccionService.ObtenerPorId(id);
+
+                if (perfilSeccion == null)
+                {
+                    return ResponseHelper.NotFoundResponse("El PerfilSeccion no fue encontrado.");
+                }
+
+                bool respuesta = await _perfilSeccionService.Eliminar(id);
+
+                if (!respuesta)
+                {
+                    return ResponseHelper.BadRequestResponse("No se pudo eliminar el regsitro.");
+                }
+
+                return ResponseHelper.Success("PerfilSeccion eliminado correctamente.");
             }
-
-            await _perfilSeccionService.Eliminar(id);
-            //await _PerfilSeccionService.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
-
-        //private bool PerfilSeccionExists(int id)
-        //{
-        //    return _context.PerfilSecciones.Any(e => e.Id == id);
-        //}
     }
 }

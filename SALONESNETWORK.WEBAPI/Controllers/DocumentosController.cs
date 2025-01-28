@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SALONESNETWORK.BLL.DTOs;
+using SALONESNETWORK.WEBAPI.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
+using SALONESNETWORK.BLL.Helpers;
 
 namespace SALONESNETWORK.WEBAPI.Controllers
 {
@@ -16,7 +17,6 @@ namespace SALONESNETWORK.WEBAPI.Controllers
     [ApiController]
     public class DocumentosController : ControllerBase
     {
-        //private readonly SalonesDbContext _context;
 
         private readonly IDocumentoService _documentosService;
 
@@ -27,105 +27,140 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
         // GET: api/Documentos
         [HttpGet("GetDocumentos")]
-        public async Task<ActionResult<IEnumerable<Documento>>> GetDocumentos()
+        public async Task<IActionResult> GetDocumentos()
         {
-            //return await _context.Documentoses.ToListAsync();
-            IQueryable<Documento> queryContactoSQL = await _documentosService.ObtenerTodos();
+            try
+            {
+                IQueryable<Documento> query = await _documentosService.ObtenerTodos();
 
-            List<DocumentoDTO> lista = queryContactoSQL
-                                                     .Select(c => new DocumentoDTO()
-                                                     {
-                                                         Id = c.Id,
-                                                         Descripcion = c.Descripcion,
-                                                         Ubicacion = c.Ubicacion
-                                                     }).ToList();
+                List<DocumentoDTO> lista = query
+                    .Select(c => new DocumentoDTO
+                    {
+                        Id = c.Id,
+                        Descripcion = c.Descripcion,
+                        Ubicacion = c.Ubicacion
+                    }).ToList();
 
-            return StatusCode(StatusCodes.Status200OK, lista);
+                return ResponseHelper.Success(lista, "Lista de documentos obtenida correctamente.");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // GET: api/Documentos/5
         [HttpGet("GetDocumentosById")]
-        public async Task<ActionResult<Documento>> GetDocumentosById(int id)
+        public async Task<IActionResult> GetDocumentosById(int id)
         {
-            // Llama al servicio para obtener el registro por ID
-            var Documentos = await _documentosService.ObtenerPorId(id);
-
-            // Verifica si el resultado es nulo
-            if (Documentos == null)
+            try
             {
-                return NotFound(new { mensaje = "El país no fue encontrado." });
+                var documento = await _documentosService.ObtenerPorId(id);
+
+                if (documento == null)
+                {
+                    return ResponseHelper.NotFoundResponse("El documento no fue encontrado.");
+                }
+
+                var documentoDTO = new DocumentoDTO
+                {
+                    Id = documento.Id,
+                    Descripcion = documento.Descripcion,
+                    Ubicacion = documento.Ubicacion
+                };
+
+                return ResponseHelper.Success(documentoDTO, "Documento obtenido correctamente.");
             }
-
-            // Convierte la entidad a DTO
-            var DocumentosDTO = new DocumentoDTO
+            catch (Exception ex)
             {
-                Id = Documentos.Id,
-                Descripcion = Documentos.Descripcion,
-                Ubicacion = Documentos.Ubicacion
-            };
-
-            // Retorna el DTO con un status 200
-            return Ok(DocumentosDTO);
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // PUT: api/Documentos/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("PutDocumentos")]
         public async Task<IActionResult> PutDocumentos(DocumentoDTO modelo)
         {
-            // Buscar el modelo existente en la base de datos
-            var DocumentosExistente = await _documentosService.ObtenerPorId(modelo.Id);
+            try
+            {
+                var documentoExistente = await _documentosService.ObtenerPorId(modelo.Id);
 
-            if (DocumentosExistente == null)
-                return NotFound(new { mensaje = "El país no existe." });
+                if (documentoExistente == null)
+                {
+                    return ResponseHelper.NotFoundResponse("El documento no fue encontrado.");
+                }
 
-            // Actualizar solo las propiedades del modelo que tienen datos en el DTO
-            DocumentosExistente.Descripcion = modelo.Descripcion;
-            DocumentosExistente.Ubicacion = modelo.Ubicacion;
+                documentoExistente.Descripcion = modelo.Descripcion;
+                documentoExistente.Ubicacion = modelo.Ubicacion;
 
-            // Realizar la actualización
-            bool respuesta = await _documentosService.Actualizar(DocumentosExistente);
+                bool respuesta = await _documentosService.Actualizar(documentoExistente);
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+                if (!respuesta)
+                {
+                    return ResponseHelper.BadRequestResponse("No se pudo actualizar el documento.");
+                }
+
+                return ResponseHelper.Success("Documento actualizado correctamente.");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // POST: api/Documentos
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("PostDocumentos")]
         public async Task<IActionResult> PostDocumentos(DocumentoDTO modelo)
         {
-
-            Documento NuevoModelo = new Documento()
+            try
             {
-                Descripcion = modelo.Descripcion,
-                Ubicacion = modelo.Ubicacion
-            };
+                Documento nuevoDocumento = new Documento
+                {
+                    Descripcion = modelo.Descripcion,
+                    Ubicacion = modelo.Ubicacion
+                };
 
-            bool respuesta = await _documentosService.Insertar(NuevoModelo);
+                bool respuesta = await _documentosService.Insertar(nuevoDocumento);
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+                if (!respuesta)
+                {
+                    return ResponseHelper.BadRequestResponse("No se pudo insertar el documento.");
+                }
 
+                return ResponseHelper.Success("Documento creado correctamente.");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // DELETE: api/Documentos/5
         [HttpDelete("DeleteDocumentos")]
         public async Task<IActionResult> DeleteDocumentos(int id)
         {
-            var Documentos = await _documentosService.ObtenerPorId(id);
-            if (Documentos == null)
+            try
             {
-                return NotFound();
+                var documento = await _documentosService.ObtenerPorId(id);
+
+                if (documento == null)
+                {
+                    return ResponseHelper.NotFoundResponse("El documento no fue encontrado.");
+                }
+
+                bool respuesta = await _documentosService.Eliminar(id);
+
+                if (!respuesta)
+                {
+                   return ResponseHelper.BadRequestResponse("No se pudo eliminar el documento.");
+                }
+
+                return ResponseHelper.Success("Documento eliminado correctamente.");
             }
-
-            await _documentosService.Eliminar(id);
-            //await _documentosService.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
-
-        //private bool DocumentosExists(int id)
-        //{
-        //    return _context.Documentoses.Any(e => e.Id == id);
-        //}
     }
 }

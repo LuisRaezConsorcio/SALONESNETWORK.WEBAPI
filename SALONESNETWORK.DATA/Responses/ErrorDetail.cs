@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace SALONESNETWORK.BLL.DTOs
 {
-    public class DocumentoDTO
+    public class ErrorDetail
     {
-        public int Id { get; set; }
-        public string? Descripcion { get; set; }
-        public string? Ubicacion { get; set; }
-
+        
     }
+
 }

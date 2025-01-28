@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SALONESNETWORK.BLL.DTOs;
+using SALONESNETWORK.WEBAPI.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
+using SALONESNETWORK.BLL.Helpers;
 
 namespace SALONESNETWORK.WEBAPI.Controllers
 {
@@ -18,7 +19,6 @@ namespace SALONESNETWORK.WEBAPI.Controllers
     [ApiController]
     public class PaisController : ControllerBase
     {
-        //private readonly SalonesDbContext _context;
 
         private readonly IPaisService _paisService;
 
@@ -29,117 +29,152 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
         // GET: api/Pais
         [HttpGet("GetPaises")]
-        public async Task<ActionResult<IEnumerable<Pais>>> GetPaises()
+        public async Task<IActionResult> GetPaises()
         {
-            //return await _context.Paises.ToListAsync();
-            IQueryable<Pais> queryContactoSQL = await _paisService.ObtenerTodos();
+            try
+            {
+                var queryContactoSQL = await _paisService.ObtenerTodos();
 
-            List<PaisDTO> lista = queryContactoSQL
-                                                     .Select(c => new PaisDTO()
-                                                     {
-                                                         Id = c.Id,
-                                                         Nombre = c.Nombre,
-                                                         FechaCreacion = c.FechaCreacion,
-                                                         UsuarioCreacion = c.UsuarioCreacion,
-                                                         FechaModificacion = c.FechaModificacion,
-                                                         UsuarioModificacion = c.UsuarioModificacion,
-                                                         Estado = c.Estado,
-                                                     }).ToList();
+                var lista = queryContactoSQL
+                    .Select(c => new PaisDTO
+                    {
+                        Id = c.Id,
+                        Nombre = c.Nombre,
+                        FechaCreacion = c.FechaCreacion,
+                        UsuarioCreacion = c.UsuarioCreacion,
+                        FechaModificacion = c.FechaModificacion,
+                        UsuarioModificacion = c.UsuarioModificacion,
+                        Estado = c.Estado,
+                    }).ToList();
 
-            return StatusCode(StatusCodes.Status200OK, lista);
+                return ResponseHelper.Success(lista, "Países obtenido correctamente.");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // GET: api/Pais/5
         [HttpGet("GetPaisById")]
-        public async Task<ActionResult<Pais>> GetPaisById(int id)
+        public async Task<IActionResult> GetPaisById(int id)
         {
-            // Llama al servicio para obtener el registro por ID
-            var pais = await _paisService.ObtenerPorId(id);
-
-            // Verifica si el resultado es nulo
-            if (pais == null)
+            try
             {
-                return NotFound(new { mensaje = "El país no fue encontrado." });
+                var pais = await _paisService.ObtenerPorId(id);
+
+                if (pais == null)
+                {
+                    return ResponseHelper.NotFoundResponse("El país no fue encontrado.");
+                }
+
+                var paisDTO = new PaisDTO
+                {
+                    Id = pais.Id,
+                    Nombre = pais.Nombre,
+                    FechaCreacion = pais.FechaCreacion,
+                    UsuarioCreacion = pais.UsuarioCreacion,
+                    FechaModificacion = pais.FechaModificacion,
+                    UsuarioModificacion = pais.UsuarioModificacion,
+                    Estado = pais.Estado
+                };
+
+                return ResponseHelper.Success(paisDTO, "País obtenido correctamente.");
             }
-
-            // Convierte la entidad a DTO
-            var paisDTO = new PaisDTO
+            catch (Exception ex)
             {
-                Id = pais.Id,
-                Nombre = pais.Nombre,
-                FechaCreacion = pais.FechaCreacion,
-                UsuarioCreacion = pais.UsuarioCreacion,
-                FechaModificacion = pais.FechaModificacion,
-                UsuarioModificacion = pais.UsuarioModificacion,
-                Estado = pais.Estado
-            };
-
-            // Retorna el DTO con un status 200
-            return Ok(paisDTO);
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // PUT: api/Pais/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("PutPais")]
         public async Task<IActionResult> PutPais(PaisDTO modelo)
         {
-            // Buscar el modelo existente en la base de datos
-            var paisExistente = await _paisService.ObtenerPorId(modelo.Id);
+            try
+            {
+                var paisExistente = await _paisService.ObtenerPorId(modelo.Id);
 
-            if (paisExistente == null)
-                return NotFound(new { mensaje = "El país no existe." });
+                if (paisExistente == null)
+                {
+                    return ResponseHelper.NotFoundResponse("El país no fue encontrado.");
+                }
 
-            // Actualizar solo las propiedades del modelo que tienen datos en el DTO
-            paisExistente.Nombre = modelo.Nombre ?? paisExistente.Nombre;
-            paisExistente.FechaModificacion = DateTime.Now;
-            paisExistente.UsuarioModificacion = modelo.UsuarioModificacion ?? paisExistente.UsuarioModificacion;
-            paisExistente.Estado = modelo.Estado ?? paisExistente.Estado;
+                paisExistente.Nombre = modelo.Nombre ?? paisExistente.Nombre;
+                paisExistente.FechaModificacion = DateTime.Now;
+                paisExistente.UsuarioModificacion = modelo.UsuarioModificacion ?? paisExistente.UsuarioModificacion;
+                paisExistente.Estado = modelo.Estado ?? paisExistente.Estado;
 
-            // Realizar la actualización
-            bool respuesta = await _paisService.Actualizar(paisExistente);
+                var respuesta = await _paisService.Actualizar(paisExistente);
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+                if (!respuesta)
+                {
+                    return ResponseHelper.BadRequestResponse("No se pudo actualizar el pais.");
+                }
+
+                return ResponseHelper.Success("El país fue actualizado exitosamente.");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // POST: api/Pais
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("PostPais")]
         public async Task<IActionResult> PostPais(PaisDTO modelo)
         {
-
-            Pais NuevoModelo = new Pais()
+            try
             {
-                Nombre = modelo.Nombre,
-                FechaCreacion = DateTime.Now,
-                UsuarioCreacion = 1,
-                Estado = true
-            };
+                var nuevoModelo = new Pais
+                {
+                    Nombre = modelo.Nombre,
+                    FechaCreacion = DateTime.Now,
+                    UsuarioCreacion = modelo.UsuarioCreacion ?? 1,
+                    Estado = true
+                };
 
-            bool respuesta = await _paisService.Insertar(NuevoModelo);
+                var respuesta = await _paisService.Insertar(nuevoModelo);
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+                if (!respuesta)
+                {
+                    return ResponseHelper.BadRequestResponse("No se pudo insertar el pais.");
+                }
 
+                return ResponseHelper.Success("El país fue creado exitosamente.");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // DELETE: api/Pais/5
         [HttpDelete("DeletePais")]
         public async Task<IActionResult> DeletePais(int id)
         {
-            var pais = await _paisService.ObtenerPorId(id);
-            if (pais == null)
+            try
             {
-                return NotFound();
+                var pais = await _paisService.ObtenerPorId(id);
+
+                if (pais == null)
+                {
+                    return ResponseHelper.NotFoundResponse("El país no fue encontrado.");
+                }
+
+                bool respuesta = await _paisService.Eliminar(id);
+
+                if (!respuesta)
+                {
+                    return ResponseHelper.BadRequestResponse("No se pudo eliminar el pais.");
+                }
+
+                return ResponseHelper.Success("El país fue eliminado exitosamente.");
             }
-
-            await _paisService.Eliminar(id);
-            //await _paisService.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
-
-        //private bool PaisExists(int id)
-        //{
-        //    return _context.Paises.Any(e => e.Id == id);
-        //}
     }
 }

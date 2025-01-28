@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SALONESNETWORK.BLL.DTOs
+namespace SALONESNETWORK.WEBAPI.DTOs
 {
     public class UsuarioDTO
     {
@@ -23,5 +23,6 @@ namespace SALONESNETWORK.BLL.DTOs
         public int? UserLocalComercialId { get; set; }
         //public string? Profiles { get; set; } //id o tabla intermedia con perfiles o perfilusuario
         public string? Token { get; set; }
+        public Boolean? Estado { get; set; }
     }
 }

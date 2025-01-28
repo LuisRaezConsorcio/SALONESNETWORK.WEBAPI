@@ -10,9 +10,7 @@ namespace SALONESNETWORK.BLL.Interfaces
     public interface IRegistroVisitaService
     {
         Task<bool> Insertar(RegistroVisita modelo);
-        Task<bool> Actualizar(RegistroVisita modelo);
         Task<bool> Eliminar(int id);
-        Task<RegistroVisita> ObtenerPorId(int id);
-        Task<IQueryable<RegistroVisita>> ObtenerTodos();
+        Task<RegistroVisita> ObtenerPorIdUsuario(int? Id_Usuario);
     }
 }

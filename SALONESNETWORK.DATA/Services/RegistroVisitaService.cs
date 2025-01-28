@@ -16,10 +16,6 @@ namespace SALONESNETWORK.BLL.Services
         {
             _RegistroVisitaRepository = RegistroVisitaRepository;
         }
-        public async Task<bool> Actualizar(RegistroVisita modelo)
-        {
-            return await _RegistroVisitaRepository.Actualizar(modelo);
-        }
 
         public async Task<bool> Eliminar(int id)
         {
@@ -31,14 +27,10 @@ namespace SALONESNETWORK.BLL.Services
             return await _RegistroVisitaRepository.Insertar(modelo);
         }
 
-        public async Task<RegistroVisita> ObtenerPorId(int id)
+        public async Task<RegistroVisita> ObtenerPorIdUsuario(int? Id_Usuario)
         {
-            return await _RegistroVisitaRepository.ObtenerPorId(id);
+            return await _RegistroVisitaRepository.ObtenerPorIdUsuario(Id_Usuario);
         }
 
-        public async Task<IQueryable<RegistroVisita>> ObtenerTodos()
-        {
-            return await _RegistroVisitaRepository.ObtenerTodos();
-        }
     }
 }

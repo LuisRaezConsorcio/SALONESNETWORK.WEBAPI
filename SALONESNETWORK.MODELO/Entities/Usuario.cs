@@ -20,8 +20,13 @@ namespace SALONESNETWORK.MODELS.Entities
         public int? UserLocalId2 { get; set; }
         public int? UserLocalId3 { get; set; }
         public int? UserLocalComercialId { get; set; }
-        //public string? Profiles { get; set; } //id o tabla intermedia con perfiles o perfilusuario
         public string? Token { get; set; }
+
+        public DateTime? FechaCreacion { get; set; }
+        public int? UsuarioCreacion { get; set; }
+        public DateTime? FechaModificacion { get; set; }
+        public int? UsuarioModificacion { get; set; }
+        public Boolean? Estado { get; set; }
 
         // Propiedad de navegación para la relación muchos a muchos
         public ICollection<UsuarioPerfil> UsuarioPerfiles { get; set; }

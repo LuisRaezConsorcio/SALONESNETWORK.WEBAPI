@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SALONESNETWORK.BLL.DTOs;
+using SALONESNETWORK.WEBAPI.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
+using SALONESNETWORK.BLL.Helpers;
 
 namespace SALONESNETWORK.WEBAPI.Controllers
 {
@@ -16,7 +17,6 @@ namespace SALONESNETWORK.WEBAPI.Controllers
     [ApiController]
     public class PerfilController : ControllerBase
     {
-        //private readonly SalonesDbContext _context;
 
         private readonly IPerfilService _perfilService;
 
@@ -27,121 +27,155 @@ namespace SALONESNETWORK.WEBAPI.Controllers
 
         // GET: api/Perfil
         [HttpGet("GetPerfiles")]
-        public async Task<ActionResult<IEnumerable<Perfil>>> GetPerfiles()
+        public async Task<IActionResult> GetPerfiles()
         {
-            //return await _context.Perfiles.ToListAsync();
-            IQueryable<Perfil> queryContactoSQL = await _perfilService.ObtenerTodos();
+            try
+            {
+                IQueryable<Perfil> queryContactoSQL = await _perfilService.ObtenerTodos();
+                List<PerfilDTO> lista = queryContactoSQL
+                    .Select(c => new PerfilDTO()
+                    {
+                        Id = c.Id,
+                        Nombre = c.Nombre,
+                        Descripcion = c.Descripcion,
+                        FechaCreacion = c.FechaCreacion,
+                        UsuarioCreacion = c.UsuarioCreacion,
+                        FechaModificacion = c.FechaModificacion,
+                        UsuarioModificacion = c.UsuarioModificacion,
+                        Estado = c.Estado,
+                    }).ToList();
 
-            List<PerfilDTO> lista = queryContactoSQL
-                                                     .Select(c => new PerfilDTO()
-                                                     {
-                                                         Id = c.Id,
-                                                         Nombre = c.Nombre,
-                                                         Descripcion = c.Descripcion,
-                                                         FechaCreacion = c.FechaCreacion,
-                                                         UsuarioCreacion = c.UsuarioCreacion,
-                                                         FechaModificacion = c.FechaModificacion,
-                                                         UsuarioModificacion = c.UsuarioModificacion,
-                                                         Estado = c.Estado,
-                                                     }).ToList();
-
-            return StatusCode(StatusCodes.Status200OK, lista);
+                return ResponseHelper.Success(lista, "Perfiles obtenidos correctamente.");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // GET: api/Perfil/5
         [HttpGet("GetPerfilById")]
-        public async Task<ActionResult<Perfil>> GetPerfilById(int id)
+        public async Task<IActionResult> GetPerfilById(int id)
         {
-            // Llama al servicio para obtener el registro por ID
-            var Perfil = await _perfilService.ObtenerPorId(id);
-
-            // Verifica si el resultado es nulo
-            if (Perfil == null)
+            try
             {
-                return NotFound(new { mensaje = "El país no fue encontrado." });
+                var perfil = await _perfilService.ObtenerPorId(id);
+
+                if (perfil == null)
+                {
+                    return ResponseHelper.NotFoundResponse("El perfil no fue encontrado.");
+                }
+
+                var perfilDTO = new PerfilDTO
+                {
+                    Id = perfil.Id,
+                    Nombre = perfil.Nombre,
+                    Descripcion = perfil.Descripcion,
+                    FechaCreacion = perfil.FechaCreacion,
+                    UsuarioCreacion = perfil.UsuarioCreacion,
+                    FechaModificacion = perfil.FechaModificacion,
+                    UsuarioModificacion = perfil.UsuarioModificacion,
+                    Estado = perfil.Estado
+                };
+
+                return ResponseHelper.Success(perfilDTO, "Perfil obtenido correctamente.");
             }
-
-            // Convierte la entidad a DTO
-            var PerfilDTO = new PerfilDTO
+            catch (Exception ex)
             {
-                Id = Perfil.Id,
-                Nombre = Perfil.Nombre,
-                Descripcion = Perfil.Descripcion,
-                FechaCreacion = Perfil.FechaCreacion,
-                UsuarioCreacion = Perfil.UsuarioCreacion,
-                FechaModificacion = Perfil.FechaModificacion,
-                UsuarioModificacion = Perfil.UsuarioModificacion,
-                Estado = Perfil.Estado
-            };
-
-            // Retorna el DTO con un status 200
-            return Ok(PerfilDTO);
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // PUT: api/Perfil/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("PutPerfil")]
         public async Task<IActionResult> PutPerfil(PerfilDTO modelo)
         {
-            // Buscar el modelo existente en la base de datos
-            var PerfilExistente = await _perfilService.ObtenerPorId(modelo.Id);
+            try
+            {
+                var perfilExistente = await _perfilService.ObtenerPorId(modelo.Id);
 
-            if (PerfilExistente == null)
-                return NotFound(new { mensaje = "El país no existe." });
+                if (perfilExistente == null)
+                {
+                    return ResponseHelper.NotFoundResponse("El perfil no fue encontrado.");
+                }
 
-            // Actualizar solo las propiedades del modelo que tienen datos en el DTO
-            PerfilExistente.Nombre = modelo.Nombre ?? PerfilExistente.Nombre;
-            PerfilExistente.Descripcion = modelo.Descripcion ?? PerfilExistente.Descripcion;
-            PerfilExistente.FechaModificacion = DateTime.Now;
-            PerfilExistente.UsuarioModificacion = modelo.UsuarioModificacion ?? PerfilExistente.UsuarioModificacion;
-            PerfilExistente.Estado = modelo.Estado ?? PerfilExistente.Estado;
+                perfilExistente.Nombre = modelo.Nombre ?? perfilExistente.Nombre;
+                perfilExistente.Descripcion = modelo.Descripcion ?? perfilExistente.Descripcion;
+                perfilExistente.FechaModificacion = DateTime.Now;
+                perfilExistente.UsuarioModificacion = modelo.UsuarioModificacion ?? perfilExistente.UsuarioModificacion;
+                perfilExistente.Estado = modelo.Estado ?? perfilExistente.Estado;
 
-            // Realizar la actualización
-            bool respuesta = await _perfilService.Actualizar(PerfilExistente);
+                bool respuesta = await _perfilService.Actualizar(perfilExistente);
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+                if (!respuesta)
+                {
+                    return ResponseHelper.BadRequestResponse("No se pudo actualizar el perfil.");
+                }
+
+                return ResponseHelper.Success("Perfil actualizado correctamente.");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // POST: api/Perfil
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("PostPerfil")]
         public async Task<IActionResult> PostPerfil(PerfilDTO modelo)
         {
-
-            Perfil NuevoModelo = new Perfil()
+            try
             {
-                Nombre = modelo.Nombre,
-                Descripcion = modelo.Descripcion,
-                FechaCreacion = DateTime.Now,
-                UsuarioCreacion = 1,
-                Estado = true
-            };
+                Perfil nuevoModelo = new Perfil()
+                {
+                    Nombre = modelo.Nombre,
+                    Descripcion = modelo.Descripcion,
+                    FechaCreacion = DateTime.Now,
+                    UsuarioCreacion = 1,
+                    Estado = true
+                };
 
-            bool respuesta = await _perfilService.Insertar(NuevoModelo);
+                bool respuesta = await _perfilService.Insertar(nuevoModelo);
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+                if (!respuesta)
+                {
+                    return ResponseHelper.BadRequestResponse("No se pudo insertar el perfil.");
+                }
 
+                return ResponseHelper.Success("Perfil creado correctamente.");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // DELETE: api/Perfil/5
         [HttpDelete("DeletePerfil")]
         public async Task<IActionResult> DeletePerfil(int id)
         {
-            var Perfil = await _perfilService.ObtenerPorId(id);
-            if (Perfil == null)
+            try
             {
-                return NotFound();
+                var perfil = await _perfilService.ObtenerPorId(id);
+
+                if (perfil == null)
+                {
+                    return ResponseHelper.NotFoundResponse("El perfil no fue encontrado.");
+                }
+
+                bool respuesta = await _perfilService.Eliminar(id);
+
+                if (!respuesta)
+                {
+                    return ResponseHelper.BadRequestResponse("No se pudo eliminar el perfil.");
+                }
+
+                return ResponseHelper.Success("Perfil eliminado correctamente.");
             }
-
-            await _perfilService.Eliminar(id);
-            //await _perfilService.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
-
-        //private bool PerfilExists(int id)
-        //{
-        //    return _context.Perfiles.Any(e => e.Id == id);
-        //}
     }
 }

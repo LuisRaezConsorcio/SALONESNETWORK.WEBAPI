@@ -33,6 +33,7 @@ namespace SALONESNETWORK.DAL.Repositories
         public async Task<bool> Eliminar(int id)
         {
             Usuario modelo = _dbContext.Usuarios.First(c => c.Id == id);
+            modelo.Estado = false;
             _dbContext.Usuarios.Update(modelo);
             await _dbContext.SaveChangesAsync();
             return true;

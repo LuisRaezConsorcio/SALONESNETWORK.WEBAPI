@@ -1,4 +1,5 @@
-﻿using SALONESNETWORK.DAL.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.DAL.Interfaces;
 using SALONESNETWORK.MODELS.Entities;
 using System;
@@ -18,21 +19,9 @@ namespace SALONESNETWORK.DAL.Repositories
             _dbContext = context;
         }
 
-        public async Task<bool> Actualizar(RegistroVisita modelo)
-        {
-            var entidadExistente = await _dbContext.RegistroVisitas.FindAsync(modelo.Id);
-
-            if (entidadExistente == null)
-                return false;
-
-            _dbContext.Entry(entidadExistente).CurrentValues.SetValues(modelo);
-            await _dbContext.SaveChangesAsync();
-            return true;
-        }
-
         public async Task<bool> Eliminar(int id)
         {
-            RegistroVisita modelo = _dbContext.RegistroVisitas.First(c => c.Id == id);
+            RegistroVisita modelo = await _dbContext.RegistroVisitas.FirstOrDefaultAsync(c => c.Id == id);
             _dbContext.RegistroVisitas.Update(modelo);
             await _dbContext.SaveChangesAsync();
             return true;
@@ -45,15 +34,9 @@ namespace SALONESNETWORK.DAL.Repositories
             return true;
         }
 
-        public async Task<RegistroVisita> ObtenerPorId(int id)
+        public async Task<RegistroVisita> ObtenerPorIdUsuario(int? Id_Usuario)
         {
-            return await _dbContext.RegistroVisitas.FindAsync(id);
-        }
-
-        public async Task<IQueryable<RegistroVisita>> ObtenerTodos()
-        {
-            IQueryable<RegistroVisita> queryContactoSQL = _dbContext.RegistroVisitas;
-            return queryContactoSQL;
+            return await _dbContext.RegistroVisitas.Where(c => c.Id_Usuario == Id_Usuario).FirstOrDefaultAsync();
         }
     }
 }

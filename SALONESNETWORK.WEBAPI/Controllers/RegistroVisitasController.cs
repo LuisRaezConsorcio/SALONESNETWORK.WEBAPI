@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SALONESNETWORK.BLL.DTOs;
+using SALONESNETWORK.WEBAPI.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
+using SALONESNETWORK.BLL.Helpers;
 
 namespace SALONESNETWORK.WEBAPI.Controllers
 {
@@ -16,7 +17,6 @@ namespace SALONESNETWORK.WEBAPI.Controllers
     [ApiController]
     public class RegistroVisitasController : ControllerBase
     {
-        //private readonly SalonesDbContext _context;
 
         private readonly IRegistroVisitaService _registroVisitaService;
 
@@ -25,111 +25,91 @@ namespace SALONESNETWORK.WEBAPI.Controllers
             _registroVisitaService = registroVisitaService;
         }
 
-        // GET: api/RegistroVisita
-        [HttpGet("GetRegistroVisitas")]
-        public async Task<ActionResult<IEnumerable<RegistroVisita>>> GetRegistroVisitas()
-        {
-            //return await _context.RegistroVisitaes.ToListAsync();
-            IQueryable<RegistroVisita> queryContactoSQL = await _registroVisitaService.ObtenerTodos();
-
-            List<RegistroVisitaDTO> lista = queryContactoSQL
-                                                     .Select(c => new RegistroVisitaDTO()
-                                                     {
-                                                         Id = c.Id,
-                                                         Id_Usuario = c.Id_Usuario,
-                                                         Fecha = c.Fecha,
-                                                         Ip = c.Ip
-                                                     }).ToList();
-
-            return StatusCode(StatusCodes.Status200OK, lista);
-        }
-
         // GET: api/RegistroVisita/5
-        [HttpGet("GetRegistroVisitaById")]
-        public async Task<ActionResult<RegistroVisita>> GetRegistroVisitaById(int id)
+        [HttpGet("GetRegistroVisitaByUserId")]
+        public async Task<IActionResult> GetRegistroVisitaByUserId(int Id_Usuario)
         {
-            // Llama al servicio para obtener el registro por ID
-            var RegistroVisita = await _registroVisitaService.ObtenerPorId(id);
-
-            // Verifica si el resultado es nulo
-            if (RegistroVisita == null)
+            try
             {
-                return NotFound(new { mensaje = "El país no fue encontrado." });
+                
+                RegistroVisita registroVisita = await _registroVisitaService.ObtenerPorIdUsuario(Id_Usuario);
+
+                if (registroVisita == null)
+                {
+                    return ResponseHelper.NotFoundResponse("El registro de visita no fue encontrado.");
+                }
+
+                var registroVisitaDTO = new RegistroVisitaDTO
+                {
+                    Id = registroVisita.Id,
+                    Id_Usuario = registroVisita.Id_Usuario,
+                    Fecha = registroVisita.Fecha,
+                    Ip = registroVisita.Ip
+                };
+
+                return ResponseHelper.Success(registroVisitaDTO, "Registro de visita obtenido correctamente.");
             }
-
-            // Convierte la entidad a DTO
-            var RegistroVisitaDTO = new RegistroVisitaDTO
+            catch (Exception ex)
             {
-                Id = RegistroVisita.Id,
-                Id_Usuario = RegistroVisita.Id_Usuario,
-                Fecha = RegistroVisita.Fecha,
-                Ip = RegistroVisita.Ip
-            };
-
-            // Retorna el DTO con un status 200
-            return Ok(RegistroVisitaDTO);
+                return ResponseHelper.Error(ex);
+            }
         }
 
-        // PUT: api/RegistroVisita/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("PutRegistroVisita")]
-        public async Task<IActionResult> PutRegistroVisita(RegistroVisitaDTO modelo)
-        {
-            // Buscar el modelo existente en la base de datos
-            var RegistroVisitaExistente = await _registroVisitaService.ObtenerPorId(modelo.Id);
-
-            if (RegistroVisitaExistente == null)
-                return NotFound(new { mensaje = "El país no existe." });
-
-            // Actualizar solo las propiedades del modelo que tienen datos en el DTO
-            RegistroVisitaExistente.Id_Usuario = modelo.Id_Usuario ?? RegistroVisitaExistente.Id_Usuario;
-            RegistroVisitaExistente.Fecha = modelo.Fecha ?? RegistroVisitaExistente.Fecha;
-            RegistroVisitaExistente.Ip = modelo.Ip ?? RegistroVisitaExistente.Ip;
-
-            // Realizar la actualización
-            bool respuesta = await _registroVisitaService.Actualizar(RegistroVisitaExistente);
-
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
-        }
-
+        
         // POST: api/RegistroVisita
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("PostRegistroVisita")]
         public async Task<IActionResult> PostRegistroVisita(RegistroVisitaDTO modelo)
         {
-
-            RegistroVisita NuevoModelo = new RegistroVisita()
+            try
             {
-                Id_Usuario = modelo.Id_Usuario,
-                Fecha = DateTime.Now,
-                Ip = modelo.Ip
-            };
+                RegistroVisita nuevoModelo = new RegistroVisita
+                {
+                    Id_Usuario = modelo.Id_Usuario,
+                    Fecha = DateTime.Now,
+                    Ip = modelo.Ip
+                };
 
-            bool respuesta = await _registroVisitaService.Insertar(NuevoModelo);
+                bool respuesta = await _registroVisitaService.Insertar(nuevoModelo);
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+                if (!respuesta)
+                    return ResponseHelper.BadRequestResponse("No se pudo registrar la visita.");
+
+                return ResponseHelper.Success("Registro de visita creado con éxito.");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
 
         }
 
         // DELETE: api/RegistroVisita/5
         [HttpDelete("DeleteRegistroVisita")]
-        public async Task<IActionResult> DeleteRegistroVisita(int id)
+        public async Task<IActionResult> DeleteRegistroVisita(RegistroVisitaDTO modelo)
         {
-            var RegistroVisita = await _registroVisitaService.ObtenerPorId(id);
-            if (RegistroVisita == null)
+            try
             {
-                return NotFound();
+                
+                var registroVisita = await _registroVisitaService.ObtenerPorIdUsuario(modelo.Id_Usuario);
+
+                if (registroVisita == null)
+                    return ResponseHelper.NotFoundResponse("El registro de visita no fue encontrado.");
+
+
+                bool respuesta = await _registroVisitaService.Eliminar(registroVisita.Id);
+
+                if (!respuesta)
+                    return ResponseHelper.BadRequestResponse("No se pudo eliminar el registro de visita.");
+
+
+                return ResponseHelper.Success("Registro de visita eliminado con éxito.");
             }
-
-            await _registroVisitaService.Eliminar(id);
-            //await _registroVisitaService.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
 
-        //private bool RegistroVisitaExists(int id)
-        //{
-        //    return _context.RegistroVisitaes.Any(e => e.Id == id);
-        //}
     }
 }

@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SALONESNETWORK.BLL.DTOs;
+using SALONESNETWORK.WEBAPI.DTOs;
 using SALONESNETWORK.BLL.Interfaces;
 using SALONESNETWORK.DAL.Data;
 using SALONESNETWORK.MODELS.Entities;
+using SALONESNETWORK.BLL.Helpers;
 
 namespace SALONESNETWORK.WEBAPI.Controllers
 {
@@ -16,117 +17,162 @@ namespace SALONESNETWORK.WEBAPI.Controllers
     [ApiController]
     public class AsuntoPaisSeccionSubsController : ControllerBase
     {
-        private readonly IAsuntoPaisSeccionSubService _AsuntoPaisSeccionSubService;
+        private readonly IAsuntoPaisSeccionSubService _asuntoPaisSeccionSubService;
 
-        public AsuntoPaisSeccionSubsController(IAsuntoPaisSeccionSubService AsuntoPaisSeccionSubService)
+        public AsuntoPaisSeccionSubsController(IAsuntoPaisSeccionSubService asuntoPaisSeccionSubService)
         {
-            _AsuntoPaisSeccionSubService = AsuntoPaisSeccionSubService;
+            _asuntoPaisSeccionSubService = asuntoPaisSeccionSubService;
         }
 
         // GET: api/AsuntoPaisSeccionSub
         [HttpGet("GetAsuntoPaisSeccionSubs")]
-        public async Task<ActionResult<IEnumerable<AsuntoPaisSeccionSub>>> GetAsuntoPaisSeccionSubs()
+        public async Task<IActionResult> GetAsuntoPaisSeccionSubs()
         {
-            //return await _context.AsuntoPaisSeccionSubs.ToListAsync();
-            IQueryable<AsuntoPaisSeccionSub> queryContactoSQL = await _AsuntoPaisSeccionSubService.ObtenerTodos();
+            try
+            {
+                var queryContactoSQL = await _asuntoPaisSeccionSubService.ObtenerTodos();
 
-            List<AsuntoPaisSeccionSubDTO> lista = queryContactoSQL
-                                                     .Select(c => new AsuntoPaisSeccionSubDTO()
-                                                     {
-                                                         Id = c.Id,
-                                                         Id_Asunto = c.Id_Asunto,
-                                                         Id_Pais = c.Id_Pais,
-                                                         Id_Seccion = c.Id_Seccion,
-                                                         Id_SubSeccion = c.Id_SubSeccion
-                                                     }).ToList();
+                var lista = queryContactoSQL
+                    .Select(c => new AsuntoPaisSeccionSubDTO
+                    {
+                        Id = c.Id,
+                        Id_Asunto = c.Id_Asunto,
+                        Id_Pais = c.Id_Pais,
+                        Id_Seccion = c.Id_Seccion,
+                        Id_SubSeccion = c.Id_SubSeccion,
+                        Estado = c.Estado
+                    }).ToList();
 
-            return StatusCode(StatusCodes.Status200OK, lista);
+                return ResponseHelper.Success(lista, "Registro obtenido correctamente.");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // GET: api/AsuntoPaisSeccionSub/5
         [HttpGet("GetAsuntoPaisSeccionSubById")]
-        public async Task<ActionResult<AsuntoPaisSeccionSub>> GetAsuntoPaisSeccionSubById(int id)
+        public async Task<IActionResult> GetAsuntoPaisSeccionSubById(int id)
         {
-            // Llama al servicio para obtener el registro por ID
-            var AsuntoPaisSeccionSub = await _AsuntoPaisSeccionSubService.ObtenerPorId(id);
-
-            // Verifica si el resultado es nulo
-            if (AsuntoPaisSeccionSub == null)
+            try
             {
-                return NotFound(new { mensaje = "El país no fue encontrado." });
+                var asuntoPaisSeccionSub = await _asuntoPaisSeccionSubService.ObtenerPorId(id);
+
+                if (asuntoPaisSeccionSub == null)
+                {
+                    return ResponseHelper.NotFoundResponse("El registro no fue encontrado.");
+                }
+
+                var asuntoPaisSeccionSubDTO = new AsuntoPaisSeccionSubDTO
+                {
+                    Id = asuntoPaisSeccionSub.Id,
+                    Id_Asunto = asuntoPaisSeccionSub.Id_Asunto,
+                    Id_Pais = asuntoPaisSeccionSub.Id_Pais,
+                    Id_Seccion = asuntoPaisSeccionSub.Id_Seccion,
+                    Id_SubSeccion = asuntoPaisSeccionSub.Id_SubSeccion,
+                    Estado = asuntoPaisSeccionSub.Estado
+                };
+
+                return ResponseHelper.Success(asuntoPaisSeccionSubDTO, "Registro obtenido correctamente.");
             }
-
-            // Convierte la entidad a DTO
-            var AsuntoPaisSeccionSubDTO = new AsuntoPaisSeccionSubDTO
+            catch (Exception ex)
             {
-                Id = AsuntoPaisSeccionSub.Id,
-                Id_Asunto = AsuntoPaisSeccionSub.Id_Asunto,
-                Id_Pais = AsuntoPaisSeccionSub.Id_Pais,
-                Id_Seccion = AsuntoPaisSeccionSub.Id_Seccion,
-                Id_SubSeccion = AsuntoPaisSeccionSub.Id_SubSeccion
-            };
-
-            // Retorna el DTO con un status 200
-            return Ok(AsuntoPaisSeccionSubDTO);
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // PUT: api/AsuntoPaisSeccionSub/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("PutAsuntoPaisSeccionSub")]
         public async Task<IActionResult> PutAsuntoPaisSeccionSub(AsuntoPaisSeccionSubDTO modelo)
         {
-            // Buscar el modelo existente en la base de datos
-            var AsuntoPaisSeccionSubExistente = await _AsuntoPaisSeccionSubService.ObtenerPorId(modelo.Id);
+            try
+            {
+                var asuntoPaisSeccionSubExistente = await _asuntoPaisSeccionSubService.ObtenerPorId(modelo.Id);
 
-            if (AsuntoPaisSeccionSubExistente == null)
-                return NotFound(new { mensaje = "El país no existe." });
+                if (asuntoPaisSeccionSubExistente == null)
+                {
+                    return ResponseHelper.NotFoundResponse("El registro no fue encontrado.");
+                }
 
-            // Actualizar solo las propiedades del modelo que tienen datos en el DTO
-            AsuntoPaisSeccionSubExistente.Id_Asunto = modelo.Id_Asunto ?? AsuntoPaisSeccionSubExistente.Id_Asunto;
-            AsuntoPaisSeccionSubExistente.Id_Pais = modelo.Id_Pais ?? AsuntoPaisSeccionSubExistente.Id_Pais;
-            AsuntoPaisSeccionSubExistente.Id_Seccion = modelo.Id_Seccion ?? AsuntoPaisSeccionSubExistente.Id_Seccion;
-            AsuntoPaisSeccionSubExistente.Id_SubSeccion = modelo.Id_SubSeccion ?? AsuntoPaisSeccionSubExistente.Id_SubSeccion;
+                asuntoPaisSeccionSubExistente.Id_Asunto = modelo.Id_Asunto ?? asuntoPaisSeccionSubExistente.Id_Asunto;
+                asuntoPaisSeccionSubExistente.Id_Pais = modelo.Id_Pais ?? asuntoPaisSeccionSubExistente.Id_Pais;
+                asuntoPaisSeccionSubExistente.Id_Seccion = modelo.Id_Seccion ?? asuntoPaisSeccionSubExistente.Id_Seccion;
+                asuntoPaisSeccionSubExistente.Id_SubSeccion = modelo.Id_SubSeccion ?? asuntoPaisSeccionSubExistente.Id_SubSeccion;
+                asuntoPaisSeccionSubExistente.Estado = modelo.Estado ?? asuntoPaisSeccionSubExistente.Estado;
 
-            // Realizar la actualización
-            bool respuesta = await _AsuntoPaisSeccionSubService.Actualizar(AsuntoPaisSeccionSubExistente);
+                bool respuesta = await _asuntoPaisSeccionSubService.Actualizar(asuntoPaisSeccionSubExistente);
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+                if (!respuesta)
+                {
+                    return ResponseHelper.BadRequestResponse("No se pudo actualizar el registro.");
+                }
+
+                return ResponseHelper.Success("Registro actualizado correctamente.");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // POST: api/AsuntoPaisSeccionSub
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("PostAsuntoPaisSeccionSub")]
         public async Task<IActionResult> PostAsuntoPaisSeccionSub(AsuntoPaisSeccionSubDTO modelo)
         {
-
-            AsuntoPaisSeccionSub NuevoModelo = new AsuntoPaisSeccionSub()
+            try
             {
-                Id_Asunto = modelo.Id_Asunto,
-                Id_Pais = modelo.Id_Pais,
-                Id_Seccion = modelo.Id_Seccion,
-                Id_SubSeccion = modelo.Id_SubSeccion
-            };
+                var nuevoModelo = new AsuntoPaisSeccionSub
+                {
+                    Id_Asunto = modelo.Id_Asunto,
+                    Id_Pais = modelo.Id_Pais,
+                    Id_Seccion = modelo.Id_Seccion,
+                    Id_SubSeccion = modelo.Id_SubSeccion,
+                    Estado = true
+                };
 
-            bool respuesta = await _AsuntoPaisSeccionSubService.Insertar(NuevoModelo);
+                bool respuesta = await _asuntoPaisSeccionSubService.Insertar(nuevoModelo);
 
-            return StatusCode(StatusCodes.Status200OK, new { valor = respuesta });
+                if (!respuesta)
+                {
+                    return ResponseHelper.BadRequestResponse("No se pudo ingresar el registro.");
+                }
 
+                return ResponseHelper.Success("Registro creado correctamente.");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
 
         // DELETE: api/AsuntoPaisSeccionSub/5
         [HttpDelete("DeleteAsuntoPaisSeccionSub")]
         public async Task<IActionResult> DeleteAsuntoPaisSeccionSub(int id)
         {
-            var AsuntoPaisSeccionSub = await _AsuntoPaisSeccionSubService.ObtenerPorId(id);
-            if (AsuntoPaisSeccionSub == null)
+            try
             {
-                return NotFound();
+                var asuntoPaisSeccionSub = await _asuntoPaisSeccionSubService.ObtenerPorId(id);
+
+                if (asuntoPaisSeccionSub == null)
+                {
+                    return ResponseHelper.NotFoundResponse("El registro no fue encontrado.");
+                }
+
+                bool respuesta = await _asuntoPaisSeccionSubService.Eliminar(id);
+
+
+                if (!respuesta)
+                {
+                    return ResponseHelper.BadRequestResponse("No se pudo eliminar el registro.");
+                }
+
+                return ResponseHelper.Success("Registro eliminado correctamente.");
             }
-
-            await _AsuntoPaisSeccionSubService.Eliminar(id);
-            //await _AsuntoPaisSeccionSubService.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return ResponseHelper.Error(ex);
+            }
         }
     }
 }
